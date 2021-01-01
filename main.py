@@ -7,7 +7,7 @@ from telegram.ext import PicklePersistence, Updater
 # Local imports
 from cinnabot import Command, Conversation
 from cinnabot.base import Start, About, Help
-# from cinnabot.feedback import Feedback
+from cinnabot.feedback import Feedback
 # from cinnabot.laundry import Laundry
 from cinnabot.resources import Resources
 # from cinnabot.spaces import Spaces
@@ -18,7 +18,7 @@ FEATURES = [
 	Start(), 
 	About(),
 	Help(),
-	# Feedback(),
+	Feedback(),
 	# Laundry(),
 	Resources(),
 	# Spaces(),
