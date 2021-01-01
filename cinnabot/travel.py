@@ -115,9 +115,6 @@ class NUSMap(Command):
     help_full = (
         '/map: to get a map of NUS if you\'re lost!'
     )
-    
-    def callback(self, update: Update, context, CallbackContext):
-        return
 
     # States
     GET_MAP = 0
