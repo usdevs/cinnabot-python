@@ -44,16 +44,17 @@ class Feedback(Conversation):
         ["OHS"],
     ]
 
-    RECIPIENT_IDS = {
-        "usc": 715358126,
-        "dining": 715358126,
-        "residential": 715358126,
-        "cinnabot": 715358126,
-    }
-
     TAGS = [button for row in KEYBOARD for button in row]
 
     KEYBOARD_PATTERN = '^(' + '|'.join(TAGS) + ')$' # Regex to match all valid replies
+
+    # Fill this with the chatIDs of the respective feedback recipients
+    RECIPIENT_IDS = {
+        "usc": 0,
+        "dining": 0,
+        "residential": 0,
+        "cinnabot": 0,
+    }
 
     @property
     def handler(self):
@@ -96,7 +97,7 @@ class Feedback(Conversation):
         return self.GET_FEEDBACK_MESSAGE
 
     def get_feedback_message(self, update: Update, context: CallbackContext):
-        """Prompts the user for the feedback message and removes the keyboard."""
+        """Prompts the user for the feedback message and removes the keyboard. If OHS is selected, ends the user flow."""
         logger.info('get_feedback_message')
 
         target = update.message.text.lower()
@@ -147,7 +148,7 @@ class Feedback(Conversation):
         return ConversationHandler.END
 
     def to_dining(self, update: Update, context: CallbackContext):
-        """Ends the user flow by forwarding the feedback to USC."""
+        """Ends the user flow by forwarding the feedback to dining hall committee."""
         logger.info('to_dining')
 
         update.message.forward(self.RECIPIENT_IDS['dining'])
@@ -163,7 +164,7 @@ class Feedback(Conversation):
         return ConversationHandler.END
     
     def to_residential(self, update: Update, context: CallbackContext):
-        """Ends the user flow by forwarding the feedback to USC."""
+        """Ends the user flow by forwarding the feedback to residential committee."""
         logger.info('to_residential')
 
         update.message.forward(self.RECIPIENT_IDS['residential'])
@@ -179,18 +180,88 @@ class Feedback(Conversation):
         return ConversationHandler.END
 
     def to_usdevs(self, update: Update, context: CallbackContext):
-        """Ends the user flow by forwarding the feedback to USC."""
+        """Ends the user flow by forwarding the feedback to USDevs."""
         logger.info('to_usdevs')
 
-        update.message.forward(self.RECIPIENT_IDS['usdevs'])
+        update.message.forward(self.RECIPIENT_IDS['cinnabot'])
 
         text = '\n'.join([
             '🤖: Feedback received! I will now transmit feedback to USDevs.',
             '',
-            'We really appreciate you taking the time out to submit feedback.'
+            'We really appreciate you taking the time out to submit feedback.',
+            'If you want to you may contact my owner at @sean_npn. He would love to have coffee with you.',
         ])
 
         update.message.reply_text(text)
+
+        return ConversationHandler.END
+
+    def cancel(self, update: Update, context: CallbackContext):
+        """Ends the user flow by removing the keyboard."""
+        logger.info('cancel')
+        text = f'🤖: Function /{self.command} cancelled!'
+        update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
+        return ConversationHandler.END
+
+class DHSurvey(Conversation):
+
+    command = 'dhsurvey'
+    help_text = 'to submit a survey about a meal from the dining hall'
+    help_full = (
+        '/dhsurvey: to submit a survey about a meal from the dining hall'
+    )
+
+    # States
+    HANDLE_SURVEY = 0
+
+    @property
+    def handler(self):
+        return ConversationHandler(
+            entry_points = [CommandHandler(self.command, self.entry)],
+            states = {
+                self.HANDLE_SURVEY: [MessageHandler(Filters.text, self.handle_survey)],
+            },
+            fallbacks = [
+                CommandHandler('cancel', self.cancel),
+                MessageHandler(Filters.text, self.error),
+            ],
+        )
+
+    def entry(self, update: Update, context: CallbackContext):
+        text = '\n'.join([
+            '🤖: Welcome to the Dining Hall Survey function! Please enter the following:',
+            '',
+            '1. Breakfast or dinner?',
+            '2. Which stall did you have it from?',
+            '3. Rate food from 1-5 (1: couldn\'t eat it, 5: would take another serving)',
+            '4. Any feedback or complaints?',
+            '',
+            'Here\'s a sample response:',
+            '',
+            '1. Breakfast',
+            '2. Asian',
+            '3. 4',
+            '4. Good food',
+            '',
+            'Use /cancel if you chicken out.',
+        ])
+
+        update.message.reply_text(text)
+
+        return self.HANDLE_SURVEY
+    
+    def error(self, update: Update, context: CallbackContext):
+        """Alerts the user of a bad reply and continues trying to parse user replies."""
+        logger.info('error')
+        text = f'🤖: "{update.message.text}" not recognized'
+        update.message.reply_text(text)
+
+        return self.HANDLE_SURVEY
+
+    def handle_survey(self, update: Update, context: CallbackContext):
+        """Ends the user flow by saving the survey."""
+        logger.info('handle_survey')
+        # TODO: cache survey in database
 
         return ConversationHandler.END
 
