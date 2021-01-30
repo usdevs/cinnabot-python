@@ -24,7 +24,7 @@ FEATURES = [
 	# Spaces(),
 	# PublicBus(), 
 	NUSBus(),
-	# NUSMap(),
+	NUSMap(),
 ]
 
 def main():
