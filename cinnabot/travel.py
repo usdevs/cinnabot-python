@@ -1,11 +1,14 @@
 import logging
 from pathlib import Path
 
+import requests
 from telegram import (
     Update, 
     KeyboardButton, 
     ReplyKeyboardMarkup, 
     ReplyKeyboardRemove,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
 )
 from telegram.ext import (
     CallbackContext, 
@@ -39,17 +42,28 @@ class PublicBus(Command):
         return
 
 class NUSBus(Conversation):
+    """This feels lowkey illegal or something.
+    
+    NUS next but "API reference": 'https://nextbus.comfortdelgro.com.sg/testMethod.asmx'
+    Mysterious imposter endpoint: 'https://better-nextbus.appspot.com'
+
+    The mysterious endpoint follows the official API quite closely. 
+    - e.g.: the `GetActiveBus` operation in the original is corresponds to GET https://better-nextbus.appspot.com/ActiveBus?route_code=A1 
+    """
 
     command = 'nusbus'
     help_text = 'NUS bus timings for bus stops around your location.'
     help_full = (
-        '/nusbus: NUS bus timings for bus stops around your location.'
+        '/nusbus: NUS bus timings for bus stops around your location.\n'
+        '/nusbus location: List of bus timings at your location.\n'
+        '/nusbus location bus: Live tracking of a bus until it reaches your stop.'
     )
 
     # States
     GET_BUS_TIMING = 0
 
     # Class helper variables
+    ENDPOINT = 'https://better-nextbus.appspot.com'
     KEYBOARD = [
         ['Utown', 'Science'],
         ['Arts', 'Comp'],
@@ -57,9 +71,7 @@ class NUSBus(Conversation):
         ['Law', 'Yih/Engin'],
         ['MPSH', 'KR-MRT'],
     ]
-
     TAGS = [button for row in KEYBOARD for button in row]
-
     KEYBOARD_PATTERN = '^(' + '|'.join(TAGS) + ')$' # Regex to match all valid replies
 
     @property
@@ -68,7 +80,7 @@ class NUSBus(Conversation):
             entry_points = [CommandHandler(self.command, self.entry)],
             states = {
                 self.GET_BUS_TIMING: [
-
+                    MessageHandler(Filters.regex(self.KEYBOARD_PATTERN), self._send_location_timings),
                 ],
             },
             fallbacks = [
@@ -78,6 +90,27 @@ class NUSBus(Conversation):
         )
 
     def entry(self, update: Update, context: CallbackContext):
+        """Delegate to sub-handler depending on input format"""
+        # /nusbus
+        if not context.args:
+            next_state = self._prompt_location(update, context)
+            return next_state
+        
+        # /nusbus location
+        elif len(context.args) == 1:
+            next_state = self._send_location_timings(update, context)
+            return next_state
+
+        # /nusbus location bus
+        elif len(context.args) == 2:
+            next_state = self._send_live_information(update, context)
+            return next_state
+
+        # Error
+        logging.warning(f'/nusbus unhandled input: {update.message.text}')
+        return ConversationHandler.END
+
+    def _prompt_location(self, update: Update, context: CallbackContext):
         text = "🤖: Where are you?"
         reply_markup = ReplyKeyboardMarkup(
             [[KeyboardButton('here', request_location=True)], *self.KEYBOARD],
@@ -88,26 +121,43 @@ class NUSBus(Conversation):
         update.message.reply_text(text, reply_markup=reply_markup)
         return self.GET_BUS_TIMING
     
+    def _send_location_timings(self, update: Update, context: CallbackContext):
+        bus_stop_name = update.message.text if not context.args else context.args[0]
+        # data = requests.get(f'{self.ENDPOINT}/ShuttleService?busstopname={bus_stop_name}').json()
+
+        text = bus_stop_name
+        update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
+        return ConversationHandler.END
+
+    def _send_live_information(self, update: Update, context: CallbackContext):
+        bus_stop_name, veh_plate = context.args
+        data1 = requests.get(f'{self.ENDPOINT}/ShuttleService?busstopname={bus_stop_name}').json()
+        data2 = requests.get(f'{self.ENDPOINT}/BusLocation?veh_plate={veh_plate}').json()
+        
+        update.message.reply_location(
+            latitude = data2['BusLocationResult']['lat'], 
+            longtitude = data2['BusLocationResult']['lng'],
+            heading = data2['BusLocationResult']['direction'],
+            live_period = 7*60, # Link this to bus arrival time
+            proximity_alert_radius = 100, 
+            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(text='Come faster la', callback_data=0)]]),
+        )
+        update.message.reply_text('HAXHAXHAX', reply_markup=ReplyKeyboardRemove())
+        return ConversationHandler.END
+
     def error(self, update: Update, context: CallbackContext):
         """Alerts the user of a bad reply and continues trying to parse user replies."""
         logger.info('error')
         text = f'🤖: "{update.message.text}" not recognized'
         update.message.reply_text(text)
-        return self.GET_BUS_TIMING
-
-    def get_bus_timing(self, update: Update, context: CallbackContext):
-        """Ends the user flow by sending a message with the desired resources and removing the keyboard."""
-        logger.info('get_resources')
-        text = '🤖: Link this to firebase! The current json solution is not the best ):'
-        update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
-        return ConversationHandler.END
-
+            
     def cancel(self, update: Update, context: CallbackContext):
         """Ends the user flow by removing the keyboard."""
         logger.info('cancel')
         text = f'🤖: Function /{self.command} cancelled!'
         update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
         return ConversationHandler.END
+       
 
 class NUSMap(Conversation):
 
