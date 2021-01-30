@@ -1,3 +1,10 @@
+# Config files
 config.json
 
+# Python
+**/__pycache__/
+**/.ipynb_checkpoints/
+**/*.ipynb
+
+# IDEs
 .vscode
