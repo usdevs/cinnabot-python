@@ -134,8 +134,11 @@ class Feedback(Conversation):
     def to_usc(self, update: Update, context: CallbackContext):
         """Ends the user flow by forwarding the feedback to USC."""
         logger.info('to_usc')
-
-        update.message.forward(self.RECIPIENT_IDS['usc'])
+        
+        try:
+            update.message.forward(self.RECIPIENT_IDS['usc'])
+        except Exception as e:
+            logger.error(e)
 
         text = '\n'.join([
             '🤖: Feedback received! I will now transmit feedback to USC',
@@ -151,7 +154,10 @@ class Feedback(Conversation):
         """Ends the user flow by forwarding the feedback to dining hall committee."""
         logger.info('to_dining')
 
-        update.message.forward(self.RECIPIENT_IDS['dining'])
+        try:
+            update.message.forward(self.RECIPIENT_IDS['dining'])
+        except Exception as e:
+            logger.error(e)
 
         text = '\n'.join([
             '🤖: Feedback received! I will now transmit feedback to the dining hall committee.',
@@ -167,7 +173,10 @@ class Feedback(Conversation):
         """Ends the user flow by forwarding the feedback to residential committee."""
         logger.info('to_residential')
 
-        update.message.forward(self.RECIPIENT_IDS['residential'])
+        try:
+            update.message.forward(self.RECIPIENT_IDS['residential'])
+        except Exception as e:
+            logger.error(e)
 
         text = '\n'.join([
             '🤖: Feedback received! I will now transmit feedback to the residential committee.',
@@ -183,7 +192,10 @@ class Feedback(Conversation):
         """Ends the user flow by forwarding the feedback to USDevs."""
         logger.info('to_usdevs')
 
-        update.message.forward(self.RECIPIENT_IDS['cinnabot'])
+        try:
+            update.message.forward(self.RECIPIENT_IDS['cinnabot'])
+        except Exception as e:
+            logger.error(e)
 
         text = '\n'.join([
             '🤖: Feedback received! I will now transmit feedback to USDevs.',
