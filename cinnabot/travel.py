@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 from telegram import (
     Update, 
@@ -108,7 +109,7 @@ class NUSBus(Conversation):
         update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
         return ConversationHandler.END
 
-class NUSMap(Command):
+class NUSMap(Conversation):
 
     command = 'map'
     help_text = 'to get a map of NUS if you\'re lost!'
@@ -139,14 +140,14 @@ class NUSMap(Command):
     }
 
     IMAGE_URLS = {
-        "arts": r"cinnabot\maps\FASS Map.png",
-        "comp": r"cinnabot\maps\Computing Map.png",
-        "law": r"cinnabot\maps\Law Map.png",
-        "biz": r"cinnabot\maps\Biz Map.png",
-        "utown": r"cinnabot\maps\UTown Map.png",
-        "science": r"cinnabot\maps\Science Map.png",
-        "sde": r"cinnabot\maps\SDE Map.png",
-        "yih/engin": r"cinnabot\maps\Engineering Map.png",
+        "arts": Path("cinnabot", "maps", "FASS Map.png"),
+        "comp": Path("cinnabot", "maps", "Computing Map.png"),
+        "law": Path("cinnabot", "maps", "Law Map.png"),
+        "biz": Path("cinnabot", "maps", "Biz Map.png"),
+        "utown": Path("cinnabot", "maps", "UTown Map.png"),
+        "science": Path("cinnabot", "maps", "Science Map.png"),
+        "sde": Path("cinnabot", "maps", "SDE Map.png"),
+        "yih/engin": Path("cinnabot", "maps", "Engineering Map.png"),
     }
 
     TAGS = [button for row in KEYBOARD for button in row]
@@ -167,6 +168,7 @@ class NUSMap(Command):
         )
 
     def entry(self, update: Update, context: CallbackContext):
+        logger.info('/map')
         text = "🤖: Where are you?"
         reply_markup = ReplyKeyboardMarkup(
             self.KEYBOARD,
@@ -185,25 +187,22 @@ class NUSMap(Command):
         return self.GET_MAP
 
     def get_map(self, update: Update, context: CallbackContext):
-        """Ends the user flow by sending a message with the desired resources and removing the keyboard."""
-        logger.info('get_resources')
+        """Ends the user flow by sending a message with the desired map and removing the keyboard."""
+        logger.info('get_map')
         
         location = update.message.text.lower()
-        image = open(self.IMAGE_URLS[location], 'rb')
-
         name = update.message.from_user.first_name
-        text = '\n'.join([
-            f'🤖: Hey {name}, heard of NUSMODs ?',
-            '',
-            'It is a student intiative made to improve the lives of students!',
-            'They also have a function to help you find your way around!',
-            'Click on the link below!',
-            '',
-            self.NUSMODS_URLS[location],
-        ])
-        
-        update.message.reply_photo(photo=image)
-        update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
+        with open(self.IMAGE_URLS[location], 'rb') as image:
+            text = '\n'.join([
+                f'🤖: Hey {name}, heard of NUSMODs ?',
+                '',
+                'It is a student intiative made to improve the lives of students!',
+                'They also have a function to help you find your way around!',
+                'Click on the link below!',
+                '',
+                self.NUSMODS_URLS[location],
+            ])
+            update.message.reply_photo(photo=image, caption=text, reply_markup=ReplyKeyboardRemove())
         return ConversationHandler.END
 
     def cancel(self, update: Update, context: CallbackContext):
