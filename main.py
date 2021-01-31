@@ -10,8 +10,17 @@ from cinnabot.base import Start, About, Help
 # from cinnabot.feedback import Feedback
 # from cinnabot.laundry import Laundry
 from cinnabot.resources import Resources
-# from cinnabot.spaces import Spaces
+from cinnabot.spaces import Spaces
 from cinnabot.travel import PublicBus, NUSBus, NUSMap 
+from google.cloud.firestore import Client
+from google.auth.credentials import AnonymousCredentials
+
+
+# Initialize a backend with a firestore client
+firestore = Client(
+	project='usc-website-206715',
+	credentials=AnonymousCredentials(),
+)
 
 # Initialize to check that all requirements defined in utils.py have been met.
 FEATURES = [
@@ -21,7 +30,7 @@ FEATURES = [
 	# Feedback(),
 	# Laundry(),
 	Resources(),
-	# Spaces(),
+	Spaces(database=firestore),
 	# PublicBus(), 
 	NUSBus(),
 	# NUSMap(),

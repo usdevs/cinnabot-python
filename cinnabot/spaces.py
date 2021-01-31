@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import pytz
 
 from google.cloud.firestore import Client
+from google.auth.credentials import AnonymousCredentials
 from telegram import Update
 from telegram.ext import CallbackContext
 
@@ -49,8 +50,20 @@ class Spaces(Command):
         now = datetime.now()
         today = datetime(now.year, now.month, now.day) # reset time to midnight
         tomorrow = today + timedelta(days=1)
-        events = spaces._events_between(today, tomorrow)
-        pass
+        events = self._events_between(today, tomorrow)
+
+        for event in events:
+            # Each "event" is a dictionary following the schema of documents in firestore
+            print(80*'=')
+            print(event['name'])
+            print(80*'-')
+            print('- Venue:', event['venueName'])
+            print('- start:', event['startDate'])
+            print('- end  :', event['endDate'])
+
+        # TODO: Reply user with events nicely formatted
+        return update.message.reply_text("IT WORKS")
+
 
     def _spaces_now(self, update: Update, context: CallbackContext):
         """/spaces now"""
@@ -96,6 +109,8 @@ class Spaces(Command):
 if __name__ == "__main__":
     from datetime import datetime, timedelta
     from google.cloud.firestore import Client
+
+    print("WE DO NOT REACH HERE")
 
     # Initialize a backend with a firestore client
     firestore = Client(project='usc-website-206715')
