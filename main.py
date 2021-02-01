@@ -2,7 +2,7 @@
 import json
 
 # 3rd party imports
-from telegram.ext import PicklePersistence, Updater
+from telegram.ext import PicklePersistence, Updater, CallbackQueryHandler
 
 # Local imports
 from cinnabot import Command, Conversation
@@ -43,6 +43,9 @@ def main():
 	# The dispatcher routes updates to the first matching handler
 	for feature in FEATURES:
 		cinnabot.dispatcher.add_handler(feature.handler)
+
+	# Ad-hoc handler registration for inline keyboards ):
+	cinnabot.dispatcher.add_handler(CallbackQueryHandler(NUSBus().refresh, pattern='^NUSBus.refresh.*$'))
 
 	# Store data for /help and /help <feature> in the bot
 	cinnabot.dispatcher.bot_data['help_text'] = dict()
