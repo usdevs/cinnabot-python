@@ -58,7 +58,7 @@ class NUSBus(Conversation):
     help_full = (
         '/nusbus: NUS bus timings for bus stops around your location.\n'
         '/nusbus location: List of bus timings at your location.\n'
-        '/nusbus location bus: Live tracking of a bus until it reaches your stop.'
+        '/nusbus location bus: Live tracking of a bus until it reaches your stop. (WIP)'
     )
 
     # States
@@ -115,6 +115,7 @@ class NUSBus(Conversation):
 
     def refresh(self, update: Update, context: CallbackContext):
         """Handles callbacks from the 'Refresh' button attached to messages"""
+        logger.info('/nusbus.refresh')
         query = update.callback_query
         location = query.data.replace('NUSBus.refresh', '')
 
@@ -138,7 +139,7 @@ class NUSBus(Conversation):
             return next_state
 
         # /nusbus location bus
-        elif (len(context.args) == 2) and (context.args[0].lower() in self.LOCATIONS):
+        elif (len(context.args) == 2):
             next_state = self._send_live_information(update, context)
             return next_state
 
@@ -161,6 +162,7 @@ class NUSBus(Conversation):
 
     def _prompt_location(self, update: Update, context: CallbackContext):
         """Send a keyboard to get user location"""
+        logger.info('/nusbus')
         text = "🤖: Where are you?"
         reply_markup = ReplyKeyboardMarkup(
             [[KeyboardButton('here', request_location=True)], *self.KEYBOARD],
@@ -186,14 +188,16 @@ class NUSBus(Conversation):
             lat = update.message.location.latitude
             lng = update.message.location.longitude
             location = 'utown' # Stub. This should get the nearest location
+
+        logger.info(f'/nusbus {location}')
         
         update.message.reply_text(
             text = '🤖: Getting bus timings...', 
             reply_markup = ReplyKeyboardRemove(),
         )
-        
+
         update.message.reply_text(
-            text = self._location_timings(location), 
+            text = self._location_timings(location),
             reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton('Refresh', callback_data=f'NUSBus.refresh{location}')]]),
             parse_mode = ParseMode.MARKDOWN
         )
@@ -203,32 +207,49 @@ class NUSBus(Conversation):
     def _location_timings(self, location):
         """Calls API and builds message body for location timings"""
         # Execute API calls sequentially 
-        # Todo: try async cuz this has a noticeable delay ):
-        results = list()
+        # Todo: Throttle requests bc the API doesn't like it when we query too fast.
+        # - Using time.sleep in the main thread blocks the entire application.
+        # - Making the whole bot async (to use asyncio.sleep) is probably more trouble than it's worth. 
+        # - (But if the async paradigm becomes a hit in python then maybe can consider just to give people more exposure)
+        # - Consider using context.job_queue to schedule a (possibly repeating) job for API calls in a seperate thread.
+        # - job queue example: https://github.com/python-telegram-bot/python-telegram-bot/blob/master/examples/timerbot.py
+        results = dict()
         for bus_stop_name in self.LOCATIONS[location]:
-            url = f'https://better-nextbus.appspot.com/ShuttleService?busstopname={bus_stop_name}'
-            data = requests.get(url).json()
-            results.append(data['ShuttleServiceResult'])
-
-        # Parse data into a nicely formatted message
-        lines = []
-        for result in results:
-            lines.append(f'*{result["name"]}*')
-            for shuttle in result['shuttles']:
-                bus_name = shuttle['name']
-                timing_1 = shuttle["arrivalTime"]
-                timing_2 = shuttle["nextArrivalTime"]
-                indicator = '🛑' if '-' in timing_1 else '🚍' # Checks for negative timings too
-                if timing_1 == "-":
-                    lines.append(f'{indicator}{bus_name} : - mins')
-                elif timing_1 == "1":
-                    lines.append(f'{indicator}{bus_name} : {timing_1} min, {timing_2} mins')
-                elif timing_1 == "Arr":
-                    lines.append(f'{indicator}{bus_name} : {timing_1}, {timing_2} mins')
-                else:
-                    lines.append(f'{indicator}{bus_name} : {timing_1} mins, {timing_2} mins')
-            lines.append('')
+            try:
+                data = requests.get(
+                    url = f'https://better-nextbus.appspot.com/ShuttleService', 
+                    params = {'busstopname': bus_stop_name},
+                    timeout = 1, # Waits max 1s
+                ).json()
+            
+                results[bus_stop_name] = data['ShuttleServiceResult']['shuttles']
+            
+            except requests.exceptions.Timeout:
+                results[bus_stop_name] = None
         
+        # Parse data into a nicely formatted message 
+        lines = list()
+        for bus_stop_name, shuttles in results.items():
+            lines.append(f'*{bus_stop_name}*')
+            
+            if shuttles is not None:
+                for shuttle in shuttles:
+                    bus_name = shuttle['name']
+                    timing_1 = shuttle["arrivalTime"]
+                    timing_2 = shuttle["nextArrivalTime"]
+                    indicator = '🛑' if '-' in timing_1 else '🚍' # Checks for negative timings too
+                    if timing_1 == "Arr":
+                        lines.append(f'{indicator}{bus_name} : {timing_1}, {timing_2} mins')
+                    elif timing_1 == "1":
+                        lines.append(f'{indicator}{bus_name} : {timing_1} min, {timing_2} mins')
+                    else:
+                        lines.append(f'{indicator}{bus_name} : {timing_1} mins, {timing_2} mins')
+            
+            else:
+                lines.append(f'❗️Error: Cinnabot got ignored ):')
+            
+            lines.append('')            
+
         # Add timestamp to let people know the message has been refreshed
         timestamp = datetime.now().strftime('%c') # https://strftime.org/
         lines.append(f'Last updated: {timestamp}')
@@ -237,19 +258,57 @@ class NUSBus(Conversation):
         return text 
 
     def _send_live_information(self, update: Update, context: CallbackContext):
-        bus_stop_name, veh_plate = context.args
-        data1 = requests.get(f'https://better-nextbus.appspot.com/ShuttleService?busstopname={bus_stop_name}').json()
-        data2 = requests.get(f'https://better-nextbus.appspot.com/BusLocation?veh_plate={veh_plate}').json()
+        logger.info('/nusbus location bus')
+
+        # Clean input
+        bus_stop_name, route_code = context.args
+        bus_stop_name = bus_stop_name.upper().replace('UTOWN', 'UTown') 
+        route_code = route_code.upper()
         
+        # Get bus timing
+        try:
+            shuttle_service_data = requests.get(
+                url = f'https://better-nextbus.appspot.com/ShuttleService', 
+                params = {'busstopname': bus_stop_name},
+                timeout = 1, # Waits max 1s
+            ).json()
+
+            arrival_time = None
+            for shuttle in shuttle_service_data['ShuttleServiceResult']['shuttles']:
+                if shuttle['name'] == route_code.upper():
+                    arrival_time = shuttle['arrivalTime']
+                    break
+        
+        except requests.exceptions.Timeout:
+            update.message.reply_text(f'🤖: Cinnabot got ignored ):')
+            return ConversationHandler.END
+            
+        # Get bus locations
+        try:
+            active_bus_data = requests.get(
+                url = f'https://better-nextbus.appspot.com/ActiveBus', 
+                params = {'route_code': route_code},
+                timeout = 1, # Waits max 1s
+            ).json()
+
+            active_bus = active_bus_data['ActiveBusResult']['activebus'][0]
+            
+        except requests.exceptions.Timeout:
+            update.message.reply_text(f'🤖: Cinnabot got ignored ):')
+            return ConversationHandler.END
+        
+        # Reply a live location
+        # Todo: Actually make this live
+        # - Maybe spawn a job that refreshes this message every 10s or so?
         update.message.reply_location(
-            latitude = data2['BusLocationResult']['lat'], 
-            longtitude = data2['BusLocationResult']['lng'],
-            heading = data2['BusLocationResult']['direction'],
-            live_period = 7*60, # Link this to bus arrival time
+            latitude = active_bus['lat'], 
+            longtitude = active_bus['lng'],
+            heading = active_bus['direction'],
+            live_period = arrival_time,
             proximity_alert_radius = 100, 
             reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(text='Come faster la', callback_data=0)]]),
         )
-        update.message.reply_text('HAXHAXHAX', reply_markup=ReplyKeyboardRemove())
+        update.message.reply_text('*[BETA]* Stalk the bus\'s live location!', reply_markup=ReplyKeyboardRemove())
         return ConversationHandler.END
 
 class NUSMap(Conversation):
