@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 import logging
 from pathlib import Path
 
@@ -64,6 +65,10 @@ class NUSBus(Conversation):
     # States
     GET_BUS_TIMING = 0
 
+    # list of bus stops and their locations
+    with Path('cinnabot', 'travel', 'nusstops.json').open('r') as f:
+        BUS_STOPS = json.load(f)
+
     # maps user arguments to a key recognised by the nusBusStopLocations map
     ALIASES = {
         "kr":    "kr-mrt",
@@ -105,6 +110,7 @@ class NUSBus(Conversation):
             states = {
                 self.GET_BUS_TIMING: [
                     MessageHandler(Filters.regex(self.KEYBOARD_PATTERN), self._send_location_timings),
+                    MessageHandler(Filters.location, self._send_location_timings),
                 ],
             },
             fallbacks = [
@@ -175,33 +181,44 @@ class NUSBus(Conversation):
     
     def _send_location_timings(self, update: Update, context: CallbackContext):
         """Get bus timings by location from the API and format nicely for the user"""
+        # From "Here" keyboard button
+        if update.message.location is not None:
+            user_lat = update.message.location.latitude
+            user_lng = update.message.location.longitude
+            nearest_stop = min(
+                self.BUS_STOPS, 
+                key = lambda bus_stop: (user_lat-float(bus_stop['lat']))**2 + (user_lng-float(bus_stop['lng']))**2,
+            )
+            location = nearest_stop['no'].lower()
+
         # from /nusbus location command
-        if context.args:
+        elif context.args and context.args[0].lower() in self.LOCATIONS:
             location = context.args[0].lower()
         
         # From location keyboard button
         elif update.message.text.lower() in self.LOCATIONS:
             location = update.message.text.lower()
-
-        # From "Here" keyboard button
-        else:
-            lat = update.message.location.latitude
-            lng = update.message.location.longitude
-            location = 'utown' # Stub. This should get the nearest location
-
-        logger.info(f'/nusbus {location}')
         
+        # Unable to parse input
+        else:
+            logger.warning('/nusbus._send_location_timings failed to parse input')
+            update.message.reply_text(
+                text = '🤖: Sorry! I didn\'t understand that!',
+                reply_markup = ReplyKeyboardRemove(),
+            )
+            return ConversationHandler.END
+
+        # Send out a reply!
+        logger.info(f'/nusbus {location}')
         update.message.reply_text(
             text = '🤖: Getting bus timings...', 
             reply_markup = ReplyKeyboardRemove(),
         )
-
         update.message.reply_text(
             text = self._location_timings(location),
             reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton('Refresh', callback_data=f'NUSBus.refresh{location}')]]),
             parse_mode = ParseMode.MARKDOWN
         )
-
         return ConversationHandler.END
 
     def _location_timings(self, location):
