@@ -187,7 +187,10 @@ class NUSBus(Conversation):
             user_lng = update.message.location.longitude
             nearest_stop = min(
                 self.BUS_STOPS, 
-                key = lambda bus_stop: (user_lat-float(bus_stop['lat']))**2 + (user_lng-float(bus_stop['lng']))**2,
+                key = lambda bus_stop: (
+                    (user_lat-float(bus_stop['lat']))**2 + 
+                    (user_lng-float(bus_stop['lng']))**2
+                ), # skip the sqrt bc slowww
             )
             location = nearest_stop['no'].lower()
 
