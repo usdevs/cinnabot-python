@@ -63,7 +63,7 @@ class NUSBus(Conversation):
     )
 
     # States
-    GET_BUS_TIMING = 0
+    GET_BUS_TIMINGS = 0
 
     # list of bus stops and their locations
     with Path('cinnabot', 'travel', 'nusstops.json').open('r') as f:
@@ -74,11 +74,11 @@ class NUSBus(Conversation):
         "kr":    "kr-mrt",
         "yih":   "yih/engin",
         "engin": "yih/engin",
-        "Com":   "comp",
+        "com":   "comp",
     }
 
     # groups of bus stops that should be returned together
-    LOCATIONS = {
+    GROUPS = {
         "utown":     ["UTown"],
         "science":   ["S17", "LT27"],
         "kr-mrt":    ["KR-MRT", "KR-MRT-OPP"],
@@ -90,10 +90,11 @@ class NUSBus(Conversation):
         "cenlib":    ["COMCEN", "CENLIB"],
         "law":       ["BUKITTIMAH-BTC2"],
     }
+    LOCATIONS = [location for group in GROUPS.values() for location in group]
 
     # For location prompt message
     KEYBOARD = [
-        ['Utown', 'Science'],
+        ['UTown', 'Science'],
         ['Arts', 'Comp'],
         ['CenLib', 'Biz'],
         ['Law', 'Yih/Engin'],
@@ -108,9 +109,9 @@ class NUSBus(Conversation):
         return ConversationHandler(
             entry_points = [CommandHandler(self.command, self.entry)],
             states = {
-                self.GET_BUS_TIMING: [
-                    MessageHandler(Filters.regex(self.KEYBOARD_PATTERN), self._send_location_timings),
-                    MessageHandler(Filters.location, self._send_location_timings),
+                self.GET_BUS_TIMINGS: [
+                    MessageHandler(Filters.regex(self.KEYBOARD_PATTERN), self.bus_timings_from_keyboard),
+                    MessageHandler(Filters.location, self.bus_timings_from_location),
                 ],
             },
             fallbacks = [
@@ -121,110 +122,121 @@ class NUSBus(Conversation):
 
     def refresh(self, update: Update, context: CallbackContext):
         """Handles callbacks from the 'Refresh' button attached to messages"""
-        logger.info('/nusbus.refresh')
         query = update.callback_query
-        location = query.data.replace('NUSBus.refresh', '')
+        data = query.data.replace('NUSBus.refresh', '')
+        locations = json.loads(data)
 
+        logger.info(f'/nusbus.refresh {data}')
         query.edit_message_text(
-            text = self._location_timings(location), 
-            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton('Refresh', callback_data=f'NUSBus.refresh{location}')]]),
+            text = self._bus_timings_api_response(locations),
+            reply_markup = query.message.reply_markup,
             parse_mode = ParseMode.MARKDOWN,
         )
         query.answer() # Stop loading animation on button
 
     def entry(self, update: Update, context: CallbackContext):
-        """Input validation + delegation to sub-handlers depending on input format"""
+        """Delegation to sub-handlers depending on input format"""
         # /nusbus
         if not context.args:
-            next_state = self._prompt_location(update, context)
-            return next_state
-        
+            return self.prompt_location(update, context)
+
         # /nusbus location
-        elif (len(context.args) == 1) and (context.args[0].lower() in self.LOCATIONS):
-            next_state = self._send_location_timings(update, context)
-            return next_state
+        elif (len(context.args) == 1):
+            return self.bus_timings_from_text(update, context)
 
         # /nusbus location bus
         elif (len(context.args) == 2):
-            next_state = self._send_live_information(update, context)
-            return next_state
+            return self.bus_stalking(update, context)
 
         # Error
-        logging.warning(f'/nusbus unhandled input: {update.message.text}')
-        return ConversationHandler.END
+        else:
+            logging.warning(f'/nusbus unhandled input: {update.message.text}')
+            return self.error(update, context)
 
     def error(self, update: Update, context: CallbackContext):
         """Alerts the user of a bad reply and continues trying to parse user replies."""
         logger.info('error')
-        text = f'🤖: "{update.message.text}" not recognized'
-        update.message.reply_text(text)
-            
+        update.message.reply_text('🤖: Sorry I didn\'t understand that!')
+
     def cancel(self, update: Update, context: CallbackContext):
         """Ends the user flow by removing the keyboard."""
         logger.info('cancel')
         text = f'🤖: Function /{self.command} cancelled!'
         update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
         return ConversationHandler.END
-
-    def _prompt_location(self, update: Update, context: CallbackContext):
+    
+    def prompt_location(self, update: Update, context: CallbackContext):
         """Send a keyboard to get user location"""
         logger.info('/nusbus')
         text = "🤖: Where are you?"
         reply_markup = ReplyKeyboardMarkup(
-            [[KeyboardButton('here', request_location=True)], *self.KEYBOARD],
+            [[KeyboardButton('Here', request_location=True)], *self.KEYBOARD],
             resize_keyboard = True,
             one_time_keyboard = True,
             selective = True,
         )
         update.message.reply_text(text, reply_markup=reply_markup)
-        return self.GET_BUS_TIMING
+        return self.GET_BUS_TIMINGS
     
-    def _send_location_timings(self, update: Update, context: CallbackContext):
-        """Get bus timings by location from the API and format nicely for the user"""
-        # From "Here" keyboard button
-        if update.message.location is not None:
-            user_lat = update.message.location.latitude
-            user_lng = update.message.location.longitude
-            nearest_stop = min(
-                self.BUS_STOPS, 
-                key = lambda bus_stop: (
-                    (user_lat-float(bus_stop['lat']))**2 + 
-                    (user_lng-float(bus_stop['lng']))**2
-                ), # skip the sqrt bc slowww
-            )
-            location = nearest_stop['no'].lower()
+    def bus_timings_from_text(self, update: Update, context: CallbackContext):
+        """Parses and validates raw user input before delegating reply to a helper function"""
+        input_raw = context.args[0]
+        input_as_group = self.ALIASES.get(input_raw.lower(), input_raw.lower())
+        input_as_location = input_raw.upper().replace('UTOWN', 'UTown')
 
-        # from /nusbus location command
-        elif context.args and context.args[0].lower() in self.LOCATIONS:
-            location = context.args[0].lower()
+        # Check if input is a group
+        if input_as_group in self.GROUPS:
+            context.user_data['locations'] = self.GROUPS[input_as_group]
+            return self._bus_timings(update, context)
         
-        # From location keyboard button
-        elif update.message.text.lower() in self.LOCATIONS:
-            location = update.message.text.lower()
-        
-        # Unable to parse input
+        # Check if input is a location
+        elif input_as_location in self.LOCATIONS:
+            context.user_data['locations'] = [input_as_location]
+            return self._bus_timings(update, context)
+
+        # Handle unrecognized input
         else:
-            logger.warning('/nusbus._send_location_timings failed to parse input')
-            update.message.reply_text(
-                text = '🤖: Sorry! I didn\'t understand that!',
-                reply_markup = ReplyKeyboardRemove(),
-            )
+            update.message.reply_text(f'🤖: {input_raw} is not a valid location')
             return ConversationHandler.END
 
-        # Send out a reply!
-        logger.info(f'/nusbus {location}')
+    def bus_timings_from_keyboard(self, update: Update, context: CallbackContext):
+        """Unpacks keyboard input into a location list before delegating reply to a helper function"""
+        group = update.message.text.lower()
+        context.user_data['locations'] = self.GROUPS[group]
+        return self._bus_timings(update, context)
+
+    def bus_timings_from_location(self, update: Update, context: CallbackContext):
+        """Selects the nearest location before delegating reply to a helper function"""
+        user_lat = update.message.location.latitude
+        user_lng = update.message.location.longitude
+        nearest_stop = min(
+            self.BUS_STOPS, 
+            key = lambda bus_stop: (
+                (user_lat-float(bus_stop['lat']))**2 + 
+                (user_lng-float(bus_stop['lng']))**2
+            ), # skip the sqrt bc slowww
+        )
+        context.user_data['locations'] = [nearest_stop['no']]
+        return self._bus_timings(update, context)
+
+    def _bus_timings(self, update: Update, context: CallbackContext):
+        """Extracts relevant locations from allowed input formats and sends the corresponding bus timings"""
+        locations = context.user_data['locations']
+        del context.user_data['locations']
+
+        logger.info(f'/nusbus {locations}')
         update.message.reply_text(
-            text = '🤖: Getting bus timings...', 
+            '🤖: Getting bus timings...', 
             reply_markup = ReplyKeyboardRemove(),
         )
         update.message.reply_text(
-            text = self._location_timings(location),
-            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton('Refresh', callback_data=f'NUSBus.refresh{location}')]]),
-            parse_mode = ParseMode.MARKDOWN
+            text = self._bus_timings_api_response(locations),
+            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton('Refresh', callback_data=f'NUSBus.refresh{json.dumps(locations)}')]]),
+            parse_mode = ParseMode.MARKDOWN,
         )
         return ConversationHandler.END
 
-    def _location_timings(self, location):
+    def _bus_timings_api_response(self, locations):
         """Calls API and builds message body for location timings"""
         # Execute API calls sequentially 
         # Todo: Throttle requests bc the API doesn't like it when we query too fast.
@@ -232,16 +244,15 @@ class NUSBus(Conversation):
         # - Making the whole bot async (to use asyncio.sleep) is probably more trouble than it's worth. 
         # - (But if the async paradigm becomes a hit in python then maybe can consider just to give people more exposure)
         # - Consider using context.job_queue to schedule a (possibly repeating) job for API calls in a seperate thread.
-        # - job queue example: https://github.com/python-telegram-bot/python-telegram-bot/blob/master/examples/timerbot.py
+        # - job queue example: https://github.com/python-telegram-bot/python-telegram-bot/blob/master/examples/timerbot.py        
         results = dict()
-        for bus_stop_name in self.LOCATIONS[location]:
+        for bus_stop_name in locations:
             try:
                 data = requests.get(
                     url = f'https://better-nextbus.appspot.com/ShuttleService', 
                     params = {'busstopname': bus_stop_name},
                     timeout = 1, # Waits max 1s
                 ).json()
-            
                 results[bus_stop_name] = data['ShuttleServiceResult']['shuttles']
             
             except requests.exceptions.Timeout:
@@ -251,7 +262,7 @@ class NUSBus(Conversation):
         lines = list()
         for bus_stop_name, shuttles in results.items():
             lines.append(f'*{bus_stop_name}*')
-            
+
             if shuttles is not None:
                 for shuttle in shuttles:
                     bus_name = shuttle['name']
@@ -277,7 +288,7 @@ class NUSBus(Conversation):
         text = '\n'.join(lines)
         return text 
 
-    def _send_live_information(self, update: Update, context: CallbackContext):
+    def bus_stalking(self, update: Update, context: CallbackContext):
         logger.info('/nusbus location bus')
 
         # Clean input
