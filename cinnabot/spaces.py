@@ -52,6 +52,7 @@ class Spaces(Command):
         tomorrow = today + timedelta(days=1)
         events = self._events_between(today, tomorrow)
 
+        # TODO: Group events by venue (edit firebase query)
         for event in events:
             response = format_event(event)
             update.message.reply_text(response)
