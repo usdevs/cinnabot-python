@@ -53,23 +53,19 @@ class Spaces(Command):
         events = self._events_between(today, tomorrow)
 
         for event in events:
-            # Each "event" is a dictionary following the schema of documents in firestore
-            print(80*'=')
-            print(event['name'])
-            print(80*'-')
-            print('- Venue:', event['venueName'])
-            print('- start:', event['startDate'])
-            print('- end  :', event['endDate'])
-
-        # TODO: Reply user with events nicely formatted
-        return update.message.reply_text("IT WORKS")
+            response = format_event(event)
+            update.message.reply_text(response)
 
 
     def _spaces_now(self, update: Update, context: CallbackContext):
         """/spaces now"""
         now = datetime.now()
-        events = spaces._events_between(now, now)
-        pass
+        events = self._events_between(now, now)
+
+        for event in events:
+            response = format_event(event)
+            update.message.reply_text(response)
+        
 
     def _spaces_week(self, update: Update, context: CallbackContext):
         """/spaces week"""
@@ -105,6 +101,27 @@ class Spaces(Command):
         events = [event for event in events if event.get('startDate') <= end_time]
         
         return events
+
+    
+def format_event(event):
+    """Return format string of event details (name, venue, start date, end date)."""
+    # Each "event" is a dictionary following the schema of documents in firestore
+    event_name = event['name']
+    venue = event['venueName']
+    start_date = str(event['startDate']).split('+')[0]
+    end_date = str(event['endDate']).split('+')[0]
+
+    # TODO: Remove seconds field from time
+    response = f"Event: {event_name} \nVenue: {venue} \nStart: {start_date} \nEnd: {end_date}"
+
+    print(80*'=')
+    print(event['name'])
+    print(80*'-')
+    print('- Venue:', event['venueName'])
+    print('- start:', event['startDate'])
+    print('- end  :', event['endDate'])
+    return response
+
 
 if __name__ == "__main__":
     from datetime import datetime, timedelta
