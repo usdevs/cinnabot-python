@@ -1,4 +1,5 @@
 from datetime import datetime
+import heapq
 import json
 import logging
 from pathlib import Path
@@ -61,6 +62,9 @@ class NUSBus(Conversation):
         '/nusbus location: List of bus timings at your location.\n'
         '/nusbus location bus: Live tracking of a bus until it reaches your stop. (WIP)'
     )
+
+    # Number of seconds before API request times out
+    TIMEOUT = 3.0
 
     # States
     GET_BUS_TIMINGS = 0
@@ -209,14 +213,17 @@ class NUSBus(Conversation):
         """Selects the nearest location before delegating reply to a helper function"""
         user_lat = update.message.location.latitude
         user_lng = update.message.location.longitude
-        nearest_stop = min(
-            self.BUS_STOPS, 
+        
+        # Get the 3 nearest bus stops by distance
+        nearest_stops = heapq.nsmallest(
+            3, self.BUS_STOPS, 
             key = lambda bus_stop: (
                 (user_lat-float(bus_stop['lat']))**2 + 
                 (user_lng-float(bus_stop['lng']))**2
             ), # skip the sqrt bc slowww
         )
-        context.user_data['locations'] = [nearest_stop['no']]
+
+        context.user_data['locations'] = [bus_stop['no'] for bus_stop in nearest_stops]
         return self._bus_timings(update, context)
 
     def _bus_timings(self, update: Update, context: CallbackContext):
@@ -251,7 +258,7 @@ class NUSBus(Conversation):
                 data = requests.get(
                     url = f'https://better-nextbus.appspot.com/ShuttleService', 
                     params = {'busstopname': bus_stop_name},
-                    timeout = 1, # Waits max 1s
+                    timeout = self.TIMEOUT, # Waits max 1s
                 ).json()
                 results[bus_stop_name] = data['ShuttleServiceResult']['shuttles']
             
@@ -301,7 +308,7 @@ class NUSBus(Conversation):
             shuttle_service_data = requests.get(
                 url = f'https://better-nextbus.appspot.com/ShuttleService', 
                 params = {'busstopname': bus_stop_name},
-                timeout = 1, # Waits max 1s
+                timeout = self.TIMEOUT, # Waits max 1s
             ).json()
 
             arrival_time = None
@@ -319,7 +326,7 @@ class NUSBus(Conversation):
             active_bus_data = requests.get(
                 url = f'https://better-nextbus.appspot.com/ActiveBus', 
                 params = {'route_code': route_code},
-                timeout = 1, # Waits max 1s
+                timeout = self.TIMEOUT, # Waits max 1s
             ).json()
 
             active_bus = active_bus_data['ActiveBusResult']['activebus'][0]
