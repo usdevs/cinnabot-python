@@ -1,12 +1,20 @@
 from datetime import datetime, timedelta
+import logging
 import pytz
 
 from google.cloud.firestore import Client
 from google.auth.credentials import AnonymousCredentials
-from telegram import Update
+from telegram import Update, ParseMode
 from telegram.ext import CallbackContext
 
-from .utils import Command
+from cinnabot import Command
+
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', 
+    level=logging.INFO,
+)
+
+logger = logging.getLogger(__name__)
 
 class Spaces(Command):
     command = 'spaces'
@@ -27,85 +35,104 @@ class Spaces(Command):
         """Delegates behaviour to sub-handlers depending on input format"""
         # /spaces
         if not context.args:
-            self._spaces(update, context)
+            self.spaces(update, context)
         
         # /spaces now
         elif context.args[0].lower() == 'now':
-            self._spaces_now(update, context)
+            self.spaces_now(update, context)
         
         # /spaces week
         elif context.args[0].lower() == 'week':
-            self._spaces_week(update, context)
+            self.spaces_week(update, context)
         
         # /spaces dd/mm(/yy)
         elif len(context.args) == 1:
-            self._spaces_day(update, context)
+            self.spaces_day(update, context)
         
         # /spaces dd/mm(/yy) dd/mm(/yy)
         elif len(context.args) == 2:
-            self._spaces_date_range(update, context)
+            self.spaces_date_range(update, context)
 
-    def _spaces(self, update: Update, context: CallbackContext):
+    def spaces(self, update: Update, context: CallbackContext):
         """/spaces"""
         now = datetime.now()
         today = datetime(now.year, now.month, now.day) # reset time to midnight
         tomorrow = today + timedelta(days=1)
+        
         events = self._events_between(today, tomorrow)
+        text = '\n'.join([
+            f'Displaying bookings for today',
+            '',
+            self._format_events(events),
+        ])
+        update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
 
-        # TODO: Group events by venue (cannot use firebase for this)
-        display_events(events, update)
-
-
-    def _spaces_now(self, update: Update, context: CallbackContext):
+    def spaces_now(self, update: Update, context: CallbackContext):
         """/spaces now"""
         now = datetime.now()
-        events = self._events_between(now, now)
 
-        display_events(events, update)
+        events = self._events_between(now, now)        
+        text = '\n'.join([
+            f'Displaying ongoing bookings',
+            '',
+            self._format_events(events),
+        ])
+        update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
 
-
-    def _spaces_week(self, update: Update, context: CallbackContext):
+    def spaces_week(self, update: Update, context: CallbackContext):
         """/spaces week"""
         now = datetime.now()
         today = datetime(now.year, now.month, now.day) # reset time to midnight
         week_later = today + timedelta(days=7)
+
         events = self._events_between(today, week_later)
+        text = '\n'.join([
+            f'Displaying bookings up to a week from today',
+            '',
+            self._format_events(events),
+        ])
+        update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
 
-        display_events(events, update)
-        
-
-    def _spaces_day(self, update: Update, context: CallbackContext):
+    def spaces_day(self, update: Update, context: CallbackContext):
         """/spaces dd/mm(/yy)"""
-        text = update.message.text
-        day_str = text.split()[1]
+        day_str = context.args[0]
 
         try:
-            day = format_day_string(day_str)
+            day = self._format_day_string(day_str)
         except (ValueError, TypeError) as e:
-            print("ERROR: ", e)
-            return update.message.reply_text("Sorry that's an invalid date! Try dd/mm(/yy) instead :)")
-
+            logger.error(e)
+            update.message.reply_text("Sorry that's an invalid date! Try dd/mm(/yy) instead :)")
+            return
+        
         day_later = day + timedelta(days=1)
         events = self._events_between(day, day_later)
-        display_events(events, update)
+        text = '\n'.join([
+            f'Displaying bookings for {day.date()}',
+            '',
+            self._format_events(events),
+        ])
+        update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
 
-
-    def _spaces_date_range(self, update: Update, context: CallbackContext):
+    def spaces_date_range(self, update: Update, context: CallbackContext):
         """/spaces dd/mm(/yy) dd/mm(/yy)"""
-        text = update.message.text
-        date_range = text.split()[1:]
+        date_range = context.args
 
         try:
-            start_date = format_day_string(date_range[0])
-            end_date = format_day_string(date_range[1])
+            start_date = self._format_day_string(date_range[0])
+            end_date = self._format_day_string(date_range[1])
         except (ValueError, TypeError) as e:
-            print("ERROR:", e)
-            return update.message.reply_text("Sorry that's an invalid date! Try dd/mm(/yy) instead :)")
-
-        events = self._events_between(start_date, end_date)
-        display_events(events, update)
+            logger.error(e)
+            update.message.reply_text("Sorry that's an invalid date! Try dd/mm(/yy) instead :)")
+            return
         
-
+        events = self._events_between(start_date, end_date)
+        text = '\n'.join([
+            f'Displaying bookings between {start_date.date()} and {end_date.date()}',
+            '',
+            self._format_events(events),
+        ])
+        update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
+        
     def _events_between(self, start_time: datetime, end_time: datetime):
         """gets a set of events (E) overlapping with some interval [start_time, end_time].
         
@@ -128,53 +155,68 @@ class Spaces(Command):
         events = [event for event in events if event.get('startDate') <= end_time]
         
         return events
-
     
-def format_event(event):
-    """Return format string of event details (name, venue, start date, end date)."""
-    # Each "event" is a dictionary following the schema of documents in firestore
-    event_name = event['name']
-    venue = event['venueName']
-    start_date = str(event['startDate']).split('+')[0]
-    end_date = str(event['endDate']).split('+')[0]
+    def _format_events(self, events):
+        """Return format string of event details (name, venue, start date, end date)."""
+        # refer to https://strftime.org/ for formatting details
+        date_format = '%I:%M%p, %a %d %b %y'
 
-    # TODO: Remove seconds field from time
-    response = f"Event: {event_name} \nVenue: {venue} \nStart: {start_date} \nEnd: {end_date}"
-
-    print(80*'=')
-    print(event['name'])
-    print(80*'-')
-    print('- Venue:', event['venueName'])
-    print('- start:', event['startDate'])
-    print('- end  :', event['endDate'])
-    return response
-
-
-def display_events(events, update):
-    """Reply the user with list of events found."""
-    if not events:
-        update.message.reply_text("No events found!")
-    else:
+        # Group events by venue
+        events_by_venue = dict()
         for event in events:
-            response = format_event(event)
-            update.message.reply_text(response)
+            venue = event['venueName']
+            if venue not in events_by_venue:
+                 events_by_venue[venue] = list()
+            events_by_venue[venue].append(event)
 
+        # Build formatted message
+        lines = list()
+        for venue, venue_events in events_by_venue.items():
+            lines.extend([
+                '====================',
+                f'🌌*{venue}*',
+                '====================',
+            ])
+            for event in sorted(venue_events, key=lambda x: x['startDate']):
+                event_name = event['name']
+                start_date = event['startDate']
+                end_date = event['endDate']
 
-def format_day_string(day_str):
-    """Takes in string dd/mm(/yy) and returns datetime object. Returns ValuError otherwise."""
-    date_fields = day_str.split('/')
+                lines.extend([
+                    f'*{event_name}*',
+                    f'- {start_date.strftime(date_format)} to',
+                    f'- {end_date.strftime(date_format)}',
+                ])
+                
+                # if start_date == end_date:
+                #     lines.append(f'*{event_name}*: {start_time} to {end_time}, {end_date}')
+                # else:
+                #     lines.append(f'*{event_name}*: {start_time}, {start_date} to {end_time}, {end_date}')
+            lines.append('')
+        
+        # Handle cases when events query returns no results
+        if lines:
+            text = '\n'.join(lines)
+        else:
+            text = 'No events found!'
 
-    if len(date_fields) == 2:
-        # dd/mm
-        day_str += '/' + str(datetime.now().year)       # Append year
-        day = datetime.strptime(day_str, "%d/%m/%Y")    # Str to datetime
-    elif len(date_fields) == 3:
-        # dd/mm/yy
-        day = datetime.strptime(day_str, "%d/%m/%y")    # %y for last 2 digits of year
-    else:
-        raise ValueError
+        return text
 
-    return day
+    def _format_day_string(self, day_str):
+        """Takes in string dd/mm(/yy) and returns datetime object. Returns ValuError otherwise."""
+        date_fields = day_str.split('/')
+
+        if len(date_fields) == 2:
+            # dd/mm
+            day_str += '/' + str(datetime.now().year)       # Append year
+            day = datetime.strptime(day_str, "%d/%m/%Y")    # Str to datetime
+        elif len(date_fields) == 3:
+            # dd/mm/yy
+            day = datetime.strptime(day_str, "%d/%m/%y")    # %y for last 2 digits of year
+        else:
+            raise ValueError
+
+        return day
 
 
 if __name__ == "__main__":
@@ -185,7 +227,7 @@ if __name__ == "__main__":
     firestore = Client(project='usc-website-206715')
     spaces = Spaces(database=firestore)
     
-    # Test event querying (Actually this block can go in Spaces._spaces)
+    # Test event querying (Actually this block can go in Spaces.spaces)
     now = datetime.now()
     today = datetime(now.year, now.month, now.day) # reset time to midnight
     tomorrow = today + timedelta(days=1)
