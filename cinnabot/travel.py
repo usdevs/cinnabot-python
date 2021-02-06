@@ -1,4 +1,6 @@
 import logging
+import requests
+import json
 from pathlib import Path
 
 from telegram import (
@@ -42,10 +44,10 @@ class PublicBus(Conversation):
     GET_BUS_TIMING, UNIVERSITY_TOWN, NEW_TOWN_SEC_SCH, AFT_DOVER_RD, AFT_CLEMENTI_AVE_1 = range(5)
     
     # Bus stop codes
-    Bus_Stop_Code = {UNIVERSITY_TOWN : 19059,
-                     NEW_TOWN_SEC_SCH : 19051,
-                     AFT_DOVER_RD : 17099,
-                     AFT_CLEMENTI_AVE_1 : 17091,
+    BUS_STOP_CODE = {'University Town' : 19059,
+                     'New Town Sec Sch' : 19051,
+                     'Aft Dover Rd' : 17099,
+                     'Aft Clementi Ave 1' : 17091,
                      
                      }
 
@@ -96,9 +98,14 @@ class PublicBus(Conversation):
 
     def get_bus_timing(self, update: Update, context: CallbackContext):
         """Handles bus timings"""
-        print(dir(self))
-        text = "Successfully triggered"
-        update.message.reply_text(text)
+        stop_code = self.BUS_STOP_CODE[update.message.text]
+        #Authentication parameters
+        headers = { 'AccountKey' : 'l88uTu9nRjSO6VYUUwilWg=='} #this is by default
+        
+        response = requests.get("http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode={stop_code}", headers = headers )
+        print(response.status_code)
+
+        update.message.reply_text(stop_code)
         return self.GET_BUS_TIMING
 
     def cancel(self, update: Update, context: CallbackContext):
