@@ -1,5 +1,7 @@
 # Config files
 config.json
+db.p
+.*
 
 # Python
 **/__pycache__/
