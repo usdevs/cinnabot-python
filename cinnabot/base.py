@@ -1,6 +1,6 @@
 import logging
 
-from telegram import Update, ParseMode
+from telegram import Update, ParseMode, ReplyKeyboardRemove, replymarkup
 from telegram.ext import CallbackContext
 
 from cinnabot import Command
@@ -20,7 +20,7 @@ class Start(Command):
             'Im Cinnabot🤖. I am made by my owners to serve the residents of Cinnamon college!',
             'Im always here to /help if you need it!',
         ])
-        update.message.reply_text(text)
+        update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
 
     
 class About(Command):
@@ -35,7 +35,7 @@ class About(Command):
             # text += fmt.Sprintf("Last updated %v\n", os.Getenv("LASTUPDATED"))
             'Touch me: https://github.com/usdevs/cinnabot'	
         ])
-        update.message.reply_text(text)
+        update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
 
 
 class Help(Command):
@@ -73,20 +73,4 @@ class Help(Command):
                     text,
                 ])
         
-        update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
-
-# class Default:
-#     COMMAND = None
-#     HELP = None # If appropriate, fill this with useful text to add to /help
-    
-#     @staticmethod
-#     def callback(update: Update, context: CallbackContext):
-#         pass
-
-# class Error:
-#     COMMAND = None
-#     HELP = '' # If appropriate, fill this with something useful to add to /help
-
-#     @staticmethod
-#     def callback(update: Update, context: CallbackContext):
-#         pass
+        update.message.reply_text(text, reply_markup=ReplyKeyboardRemove(), parse_mode=ParseMode.MARKDOWN)

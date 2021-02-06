@@ -115,7 +115,7 @@ class Claims(Conversation):
     def handler(self):
         return ConversationHandler(
             entry_points = [
-                CommandHandler('claims', self.entry),
+                CommandHandler(self.command, self.entry),
             ],
             states = {
                 state: self._make_handlers(mapping)
