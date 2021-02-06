@@ -1,9 +1,15 @@
+# Config files
 config.json
 db.p
 .*
 
+# Python
+**/__pycache__/
+**/.ipynb_checkpoints/
+**/*.ipynb
+
+# IDEs
 .vscode
 
-__pycache__
-.ipynb_checkpoints
-*.ipynb
+# Virtual Envrionment
+venv/
