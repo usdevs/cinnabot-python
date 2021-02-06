@@ -1,11 +1,7 @@
-# Standard library imports
-import json
-
 # 3rd party imports
 from telegram.ext import PicklePersistence, Updater, CallbackQueryHandler
 
 # Local imports
-from cinnabot import Command, Conversation
 from cinnabot.base import Start, About, Help
 from cinnabot.claims import Claims
 from cinnabot.feedback import Feedback
@@ -29,35 +25,60 @@ FEATURES = [
 	NUSMap(),
 ]
 
-def main():
-	# Read config
-	with open('config.json', 'r') as f:
-		config = json.load(f)
-
+def make_cinnabot(token):
+	"""Helps initialize an updater with our features"""
 	# The updater primarily gets telegram updates from telegram servers
-	cinnabot = Updater(
-		token = config['telegram_bot_token'], 
-		# persistence = PicklePersistence(config['persistence_file']),
-	)
+	updater = Updater(token)
 
 	# The dispatcher routes updates to the first matching handler
 	for feature in FEATURES:
-		cinnabot.dispatcher.add_handler(feature.handler)
+		updater.dispatcher.add_handler(feature.handler)
 
 	# Ad-hoc handler registration for inline keyboards ):
-	cinnabot.dispatcher.add_handler(CallbackQueryHandler(NUSBus().refresh, pattern='^NUSBus.refresh.*$'))
+	updater.dispatcher.add_handler(CallbackQueryHandler(NUSBus().refresh, pattern='^NUSBus.refresh.*$'))
 
 	# Store data for /help and /help <feature> in the bot
-	cinnabot.dispatcher.bot_data['help_text'] = dict()
-	cinnabot.dispatcher.bot_data['help_full'] = dict()
+	updater.dispatcher.bot_data['help_text'] = dict()
+	updater.dispatcher.bot_data['help_full'] = dict()
 	for feature in FEATURES:
-		cinnabot.dispatcher.bot_data['help_text'][feature.command] = feature.help_text
-		cinnabot.dispatcher.bot_data['help_full'][feature.command] = feature.help_full
+		updater.dispatcher.bot_data['help_text'][feature.command] = feature.help_text
+		updater.dispatcher.bot_data['help_full'][feature.command] = feature.help_full
 
-	# Run the bot!
-	# cinnabot.start_webhook() # For deployment
-	cinnabot.start_polling()
-	cinnabot.idle()
+	return updater
 
 if __name__ == '__main__':
-	main()
+	import logging
+
+	logging.basicConfig(
+		format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', 
+		level=logging.INFO,
+	)
+
+	logger = logging.getLogger(__name__)
+	
+	# Deploy using webhooks if on server
+	try:
+		import os
+		TOKEN = os.environ['TOKEN']
+		HOST = os.environ['HOST']
+		PORT = os.environ.get('PORT', 5000)
+		logger.info(f'Deploying on webhook...')
+		cinnabot = make_cinnabot(TOKEN)
+		cinnabot.bot.set_webhook(f'{HOST}/{TOKEN}')		
+		cinnabot.start_webhook('0.0.0.0', PORT, url_path=TOKEN)
+		cinnabot.idle()
+	
+	# Fallback to polling (likely to be local development)
+	except KeyError:
+		import json
+		with open('config.json', 'r') as f:
+			config = json.load(f)
+			TOKEN = config.get('telegram_bot_token')
+		logger.warning(f'Deploying locally...')
+		cinnabot = make_cinnabot(TOKEN)
+		cinnabot.start_polling()
+		cinnabot.idle()
+
+	# Deployment failed?
+	except Exception as e:
+		logger.error(e)
