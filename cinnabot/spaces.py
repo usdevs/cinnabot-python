@@ -52,13 +52,8 @@ class Spaces(Command):
         tomorrow = today + timedelta(days=1)
         events = self._events_between(today, tomorrow)
 
-        all_events = list()
-
-
         # TODO: Group events by venue (cannot use firebase for this)
-        for event in events:
-            response = format_event(event)
-            update.message.reply_text(response)
+        display_events(events, update)
 
 
     def _spaces_now(self, update: Update, context: CallbackContext):
@@ -66,9 +61,8 @@ class Spaces(Command):
         now = datetime.now()
         events = self._events_between(now, now)
 
-        for event in events:
-            response = format_event(event)
-            update.message.reply_text(response)
+        display_events(events, update)
+
         
 
     def _spaces_week(self, update: Update, context: CallbackContext):
@@ -78,35 +72,38 @@ class Spaces(Command):
         week_later = today + timedelta(days=7)
         events = self._events_between(today, week_later)
 
-        for event in events:
-            response = format_event(event)
-            update.message.reply_text(response)
+        display_events(events, update)
         
 
     def _spaces_day(self, update: Update, context: CallbackContext):
         """/spaces dd/mm(/yy)"""
         text = update.message.text
-        date_fields = text.split()[1].split('/')
-        now = datetime.now()
+        day_str = text.split()[1]
 
-        if len(date_fields) == 2:
-            # dd/mm
-            day = datetime(now.year, int(date_fields[1]), int(date_fields[0]))
-        elif len(date_fields) == 3:
-            # dd/mm/yy
-            day = datetime(int(date_fields[2]), int(date_fields[1]), int(date_fields[0]))
-        else:
+        try:
+            day = format_date(day_str)
+        except (ValueError, TypeError) as e:
             return update.message.reply_text("Sorry that's an invalid date! Try dd/mm(/yy) instead :)")
-        
+
         day_later = day + timedelta(days=1)
         events = self._events_between(day, day_later)
-
         display_events(events, update)
 
 
     def _spaces_date_range(self, update: Update, context: CallbackContext):
         """/spaces dd/mm(/yy) dd/mm(/yy)"""
-        pass
+        text = update.message.text
+        date_range = text.split()[1:]
+
+        try:
+            start_date = format_date(date_range[0])
+            end_date = format(date_range[1])
+        except (ValueError, TypeError) as e:
+            return update.message.reply_text("Sorry that's an invalid date! Try dd/mm(/yy) instead :)")
+
+        events = self._events_between(start_date, end_date)
+        display_events(events, update)
+        
 
     def _events_between(self, start_time: datetime, end_time: datetime):
         """gets a set of events (E) overlapping with some interval [start_time, end_time].
@@ -152,6 +149,34 @@ def format_event(event):
     return response
 
 
+def display_events(events, update):
+    """Reply the user with list of events found."""
+    if not events:
+        update.message.reply_text("No events found!")
+    else:
+        for event in events:
+            response = format_event(event)
+            update.message.reply_text(response)
+
+
+def format_date(day_str, update):
+    date_fields = day_str.split('/')
+    print(day_str)
+
+    if len(date_fields) == 2:
+        # dd/mm
+        day_str += '/' + str(datetime.now().year)       # Append year
+        day = datetime.strptime(day_str, "%d/%m/%Y")    # Str to datetime
+    elif len(date_fields) == 3:
+        # dd/mm/yy
+        day = datetime.strptime(day_str, "%d/%m/%y")    # %y for last 2 digits of year
+    else:
+        raise ValueError
+        
+    return day
+
+
+
 if __name__ == "__main__":
     from datetime import datetime, timedelta
     from google.cloud.firestore import Client
@@ -175,13 +200,3 @@ if __name__ == "__main__":
         print('- Venue:', event['venueName'])
         print('- start:', event['startDate'])
         print('- end  :', event['endDate'])
-
-
-def display_events(events, update):
-    """Reply the user with list of events found."""
-    if not events:
-        update.message.reply_text("No events found!")
-    else:
-        for event in events:
-            response = format_event(event)
-            update.message.reply_text(response)
