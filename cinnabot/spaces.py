@@ -52,6 +52,9 @@ class Spaces(Command):
         tomorrow = today + timedelta(days=1)
         events = self._events_between(today, tomorrow)
 
+        all_events = list()
+
+
         # TODO: Group events by venue (cannot use firebase for this)
         for event in events:
             response = format_event(event)
@@ -70,11 +73,41 @@ class Spaces(Command):
 
     def _spaces_week(self, update: Update, context: CallbackContext):
         """/spaces week"""
-        pass
+        now = datetime.now()
+        today = datetime(now.year, now.month, now.day) # reset time to midnight
+        week_later = today + timedelta(days=7)
+        events = self._events_between(today, week_later)
+
+        for event in events:
+            response = format_event(event)
+            update.message.reply_text(response)
+        
 
     def _spaces_day(self, update: Update, context: CallbackContext):
         """/spaces dd/mm(/yy)"""
-        pass
+        text = update.message.text
+        date_fields = text.split()[1].split('/')
+        now = datetime.now()
+
+        if len(date_fields) == 2:
+            # dd/mm
+            day = datetime(now.year, int(date_fields[1]), int(date_fields[0]))
+        elif len(date_fields) == 3:
+            # dd/mm/yy
+            day = datetime(int(date_fields[2]), int(date_fields[1]), int(date_fields[0]))
+        else:
+            return update.message.reply_text("Sorry that's an invalid date! Try dd/mm(/yy) instead :)")
+        
+        day_later = day + timedelta(days=1)
+        events = self._events_between(day, day_later)
+
+        if not events:
+            update.message.reply_text("No events found!")
+        else:
+            for event in events:
+                response = format_event(event)
+                update.message.reply_text(response)
+
 
     def _spaces_date_range(self, update: Update, context: CallbackContext):
         """/spaces dd/mm(/yy) dd/mm(/yy)"""
@@ -127,8 +160,6 @@ def format_event(event):
 if __name__ == "__main__":
     from datetime import datetime, timedelta
     from google.cloud.firestore import Client
-
-    print("WE DO NOT REACH HERE")
 
     # Initialize a backend with a firestore client
     firestore = Client(project='usc-website-206715')
