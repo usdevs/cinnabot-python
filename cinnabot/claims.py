@@ -583,7 +583,7 @@ Claims.DATA[STUDENT_GROUP] = {
 Claims.DATA[END] = {
     'The End!': [
         Reply(
-            'We hope to see you again soon! (Use /claims to go again)',
+            'We hope to see you again soon! (Use /claimsbot to go again)',
         ), 
     ],
 }
