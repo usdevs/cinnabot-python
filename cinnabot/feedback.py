@@ -31,7 +31,7 @@ class Feedback(Conversation):
     help_full = (
         '/feedback: to give feedback'
     )
-
+    
     # States
     GET_FEEDBACK_MESSAGE, TO_USC, TO_DINING, TO_RESIDENTIAL, TO_USDEVS = range(5)
 

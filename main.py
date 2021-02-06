@@ -24,7 +24,7 @@ FEATURES = [
 	# Laundry(),
 	Resources(),
 	# Spaces(),
-	# PublicBus(), 
+	PublicBus(), 
 	NUSBus(),
 	NUSMap(),
 ]

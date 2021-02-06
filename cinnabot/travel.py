@@ -29,15 +29,85 @@ logger = logging.getLogger(__name__)
 # '/feedback: to give feedback',
 # '/laundry: to check washer and dryer availability in cinnamon',
 
-class PublicBus(Command):
+class PublicBus(Conversation):
 
     command = 'publicbus'
     help_text = 'public bus timings for bus stops around your location'
-    help_full = ''
+    help_full = (
+        '/publicbus: Public bus timings for bus stops around your location.'
+    )
+    # Public bus json api: https://datamall.lta.gov.sg/content/dam/datamall/datasets/PublicTransportRelated/BusArrival.zip
+    
+    # States
+    GET_BUS_TIMING, UNIVERSITY_TOWN, NEW_TOWN_SEC_SCH, AFT_DOVER_RD, AFT_CLEMENTI_AVE_1 = range(5)
+    
+    # Bus stop codes
+    Bus_Stop_Code = {UNIVERSITY_TOWN : 19059,
+                     NEW_TOWN_SEC_SCH : 19051,
+                     AFT_DOVER_RD : 17099,
+                     AFT_CLEMENTI_AVE_1 : 17091,
+                     
+                     }
 
-    def callback(self, update: Update, context, CallbackContext):
-        return
+    # Class helper variables
+    KEYBOARD = [
+        ['University Town', 'New Town Sec Sch'],
+        ['Aft Dover Rd', 'Aft Clementi Ave 1'],
+    ]
 
+    TAGS = [button for row in KEYBOARD for button in row]
+
+    KEYBOARD_PATTERN = '^(' + '|'.join(TAGS) + ')$' # Regex to match all valid replies
+
+    @property
+    def handler(self):
+        return ConversationHandler(
+            entry_points = [CommandHandler(self.command, self.entry)],
+            states = {
+                self.GET_BUS_TIMING: [MessageHandler(Filters.regex(self.KEYBOARD_PATTERN), self.get_bus_timing)],
+                self.UNIVERSITY_TOWN: [MessageHandler(Filters.text, self.get_bus_timing)],
+                self.NEW_TOWN_SEC_SCH: [MessageHandler(Filters.text, self.get_bus_timing)],
+                self.AFT_DOVER_RD: [MessageHandler(Filters.text, self.get_bus_timing)],
+                self.AFT_CLEMENTI_AVE_1: [MessageHandler(Filters.text, self.get_bus_timing)],
+            },
+            fallbacks = [
+                CommandHandler('cancel', self.cancel),
+                MessageHandler(Filters.text, self.error),
+            ],
+        )
+
+    def entry(self, update: Update, context: CallbackContext):
+        text = "🤖: Where are you?"
+        reply_markup = ReplyKeyboardMarkup(
+            [[KeyboardButton('here', request_location=True)], *self.KEYBOARD],
+            resize_keyboard = True,
+            one_time_keyboard = True,
+            selective = True,
+        )
+        update.message.reply_text(text, reply_markup=reply_markup)
+        return self.GET_BUS_TIMING
+
+    def error(self, update: Update, context: CallbackContext):
+        """Alerts the user of a bad reply and continues trying to parse user replies."""
+        logger.info('error')
+        text = f'🤖: "{update.message.text}" not recognized'
+        update.message.reply_text(text)
+        return self.GET_BUS_TIMING
+
+    def get_bus_timing(self, update: Update, context: CallbackContext):
+        """Handles bus timings"""
+        print(dir(self))
+        text = "Successfully triggered"
+        update.message.reply_text(text)
+        return self.GET_BUS_TIMING
+
+    def cancel(self, update: Update, context: CallbackContext):
+        """Ends the user flow by removing the keyboard."""
+        logger.info('cancel')
+        text = f'🤖: Function /{self.command} cancelled!'
+        update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
+        return ConversationHandler.END
+        
 class NUSBus(Conversation):
 
     command = 'nusbus'
