@@ -80,7 +80,7 @@ class Spaces(Command):
         day_str = text.split()[1]
 
         try:
-            day = format_date(day_str)
+            day = format_day_string(day_str)
         except (ValueError, TypeError) as e:
             print("ERROR: ", e)
             return update.message.reply_text("Sorry that's an invalid date! Try dd/mm(/yy) instead :)")
@@ -96,8 +96,8 @@ class Spaces(Command):
         date_range = text.split()[1:]
 
         try:
-            start_date = format_date(date_range[0])
-            end_date = format_date(date_range[1])
+            start_date = format_day_string(date_range[0])
+            end_date = format_day_string(date_range[1])
         except (ValueError, TypeError) as e:
             print("ERROR:", e)
             return update.message.reply_text("Sorry that's an invalid date! Try dd/mm(/yy) instead :)")
@@ -160,21 +160,20 @@ def display_events(events, update):
             update.message.reply_text(response)
 
 
-def format_date(day_str):
+def format_day_string(day_str):
     """Takes in string dd/mm(/yy) and returns datetime object. Returns ValuError otherwise."""
     date_fields = day_str.split('/')
 
     if len(date_fields) == 2:
         # dd/mm
         day_str += '/' + str(datetime.now().year)       # Append year
-        print(day_str)
         day = datetime.strptime(day_str, "%d/%m/%Y")    # Str to datetime
     elif len(date_fields) == 3:
         # dd/mm/yy
         day = datetime.strptime(day_str, "%d/%m/%y")    # %y for last 2 digits of year
     else:
         raise ValueError
-    print(day)
+
     return day
 
 
