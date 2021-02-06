@@ -101,12 +101,7 @@ class Spaces(Command):
         day_later = day + timedelta(days=1)
         events = self._events_between(day, day_later)
 
-        if not events:
-            update.message.reply_text("No events found!")
-        else:
-            for event in events:
-                response = format_event(event)
-                update.message.reply_text(response)
+        display_events(events, update)
 
 
     def _spaces_date_range(self, update: Update, context: CallbackContext):
@@ -180,3 +175,13 @@ if __name__ == "__main__":
         print('- Venue:', event['venueName'])
         print('- start:', event['startDate'])
         print('- end  :', event['endDate'])
+
+
+def display_events(events, update):
+    """Reply the user with list of events found."""
+    if not events:
+        update.message.reply_text("No events found!")
+    else:
+        for event in events:
+            response = format_event(event)
+            update.message.reply_text(response)
