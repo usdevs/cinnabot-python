@@ -105,9 +105,9 @@ class Reply:
 
 class Claims(Conversation):
 
-    command = 'claims'
-    help_text = ''
-    help_full = ''
+    command = 'claimsbot'
+    help_text = 'Filling up claims do be hard sometimes...'
+    help_full = 'Filling up claims do be hard sometimes...'
 
     DATA = dict()
 
