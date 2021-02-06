@@ -63,7 +63,6 @@ class Spaces(Command):
 
         display_events(events, update)
 
-        
 
     def _spaces_week(self, update: Update, context: CallbackContext):
         """/spaces week"""
@@ -160,8 +159,8 @@ def display_events(events, update):
 
 
 def format_date(day_str, update):
+    """Takes in string dd/mm(/yy) and returns datetime object. Returns ValuError otherwise."""
     date_fields = day_str.split('/')
-    print(day_str)
 
     if len(date_fields) == 2:
         # dd/mm
@@ -174,7 +173,6 @@ def format_date(day_str, update):
         raise ValueError
         
     return day
-
 
 
 if __name__ == "__main__":
