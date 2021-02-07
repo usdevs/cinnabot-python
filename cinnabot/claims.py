@@ -122,7 +122,8 @@ class Claims(Conversation):
                 for state, mapping in self.DATA.items()
             },
             fallbacks = [
-                CommandHandler('claims', self.entry),
+                CommandHandler(self.command, self.entry),
+                CommandHandler('cancel', self.cancel),
                 MessageHandler(Filters.text, self.error),
             ],
             per_chat = True,
@@ -165,10 +166,14 @@ class Claims(Conversation):
         next_state = last_callback(update, context, replay=True) # Skip content messages
         return next_state
 
+    def cancel(self, update: Update, context: CallbackContext):
+        """Panic button to kill claimsbot ):"""
+        return ConversationHandler.END
+
     def error(self, update: Update, context: CallbackContext):
         logger.error(f'{update.message.from_user.id}: "{update.message.text}"')
         update.message.reply_text(
-            text = 'Sorry! I didn\'t understand you.'
+            text = 'Sorry! I didn\'t understand you. (use /cancel to exit claimsbot)'
         )
 
     def _make_callback(self, user_input, replies):
