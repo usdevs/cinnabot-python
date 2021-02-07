@@ -1,6 +1,7 @@
 import logging
 import requests
 import json
+import datetime
 from pathlib import Path
 
 from telegram import (
@@ -41,8 +42,7 @@ class PublicBus(Conversation):
     # Public bus json api: https://datamall.lta.gov.sg/content/dam/datamall/datasets/PublicTransportRelated/BusArrival.zip
     
     # States
-    GET_BUS_TIMING, UNIVERSITY_TOWN, NEW_TOWN_SEC_SCH, AFT_DOVER_RD, AFT_CLEMENTI_AVE_1 = range(5)
-    
+    GET_BUS_TIMING = 0 
     # Bus stop codes
     BUS_STOP_CODE = {'University Town' : 19059,
                      'New Town Sec Sch' : 19051,
@@ -67,10 +67,6 @@ class PublicBus(Conversation):
             entry_points = [CommandHandler(self.command, self.entry)],
             states = {
                 self.GET_BUS_TIMING: [MessageHandler(Filters.regex(self.KEYBOARD_PATTERN), self.get_bus_timing)],
-                self.UNIVERSITY_TOWN: [MessageHandler(Filters.text, self.get_bus_timing)],
-                self.NEW_TOWN_SEC_SCH: [MessageHandler(Filters.text, self.get_bus_timing)],
-                self.AFT_DOVER_RD: [MessageHandler(Filters.text, self.get_bus_timing)],
-                self.AFT_CLEMENTI_AVE_1: [MessageHandler(Filters.text, self.get_bus_timing)],
             },
             fallbacks = [
                 CommandHandler('cancel', self.cancel),
@@ -100,12 +96,21 @@ class PublicBus(Conversation):
         """Handles bus timings"""
         stop_code = self.BUS_STOP_CODE[update.message.text]
         #Authentication parameters
-        headers = { 'AccountKey' : 'l88uTu9nRjSO6VYUUwilWg=='} #this is by default
-        
-        response = requests.get("http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode={stop_code}", headers = headers )
-        print(response.status_code)
+        headers = {'AccountKey' : 'l88uTu9nRjSO6VYUUwilWg=='} #this is by default
+        url = "http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode=%s"%(stop_code)
+        response = requests.get(url, headers = headers).json()
+        text = ""
+        def extract_wait_time(service):
+            bus_number = service['ServiceNo']
+            arrival_time = datetime.datetime.strptime(service['NextBus']['EstimatedArrival'],'%Y-%m-%dT%H:%M:%S+08:00')
+            current_time = datetime.datetime.now()
+            waiting_time = (arrival_time - current_time).total_seconds()/60
+            text = "arr" if waiting_time < 1 else round(waiting_time)
+            return str(bus_number) + text
 
-        update.message.reply_text(stop_code)
+        for service in response['Services']:
+            text = extract_wait_time(service)
+            update.message.reply_text(text)
         return self.GET_BUS_TIMING
 
     def cancel(self, update: Update, context: CallbackContext):
