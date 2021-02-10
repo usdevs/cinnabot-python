@@ -99,18 +99,30 @@ class PublicBus(Conversation):
         headers = {'AccountKey' : 'l88uTu9nRjSO6VYUUwilWg=='} #this is by default
         url = "http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode=%s"%(stop_code)
         response = requests.get(url, headers = headers).json()
-        text = ""
+        
+        # Initialise bus stop name
+        text = "%s\n\n"%update.message.text
+        # Returns bus number with arrival timing
         def extract_wait_time(service):
             bus_number = service['ServiceNo']
             arrival_time = datetime.datetime.strptime(service['NextBus']['EstimatedArrival'],'%Y-%m-%dT%H:%M:%S+08:00')
             current_time = datetime.datetime.now()
             waiting_time = (arrival_time - current_time).total_seconds()/60
-            text = "arr" if waiting_time < 1 else round(waiting_time)
-            return str(bus_number) + text
+            timing = "arr" if waiting_time < 1 else (str(round(waiting_time)) + " mins")
+            return (bus_number, timing)
 
+        # Saves bustimings and arrival time
+        busTime = {}
         for service in response['Services']:
-            text = extract_wait_time(service)
-            update.message.reply_text(text)
+            bus_number, timing = extract_wait_time(service)
+            busTime[bus_number] = timing
+            
+        # Prints bus and arrival timings
+        for bus_number in busTime:
+            timing = busTime[bus_number]
+            text = text + "Bus %s : %s\n"%(bus_number, timing)
+
+        update.message.reply_text(text)
         return self.GET_BUS_TIMING
 
     def cancel(self, update: Update, context: CallbackContext):
