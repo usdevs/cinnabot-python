@@ -179,8 +179,8 @@ class Spaces(Command):
             ])
             for event in sorted(venue_events, key=lambda x: x['startDate']):
                 event_name = event['name']
-                start_date = event['startDate']
-                end_date = event['endDate']
+                start_date = event['startDate'].astimezone(pytz.timezone('Asia/Singapore'))
+                end_date = event['endDate'].astimezone(pytz.timezone('Asia/Singapore'))
 
                 lines.extend([
                     f'*{event_name}*',
