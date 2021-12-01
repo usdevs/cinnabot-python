@@ -1,5 +1,5 @@
 {
-    "telegram_bot_token": "Copy your telegram bot token here",
+    "telegram_bot_token": "1903193742:AAFUGNBZHfJP6fc6XM6yzJqVVsQaq6Tzqu8",
     "persistence_file": "db.p",
     "firebase_project_id": "cinnabot-test"
 }
