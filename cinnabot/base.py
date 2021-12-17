@@ -33,7 +33,7 @@ class About(Command):
         text = '\n'.join([
             # text := fmt.Sprintf("Cinnabot %v\n", os.Getenv("COMMITHEAD"))
             # text += fmt.Sprintf("Last updated %v\n", os.Getenv("LASTUPDATED"))
-            'Follow this link here: https://github.com/usdevs/cinnabot-python'	
+            '🤖: Follow this link here: https://github.com/usdevs/cinnabot-python'	
         ])
         update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
 
@@ -42,7 +42,7 @@ class Help(Command):
     
     command = 'help'
     help_text = 'Let me help you!'
-    help_full = '/help to find out what I can do. Try using /help <func name> to see what I can _really_ do!'
+    help_full = 'Use /help <func name> for more information about the feature!'
 
     def callback(self, update: Update, context: CallbackContext):
         # Default help text 
@@ -52,7 +52,7 @@ class Help(Command):
             'Here are a list of functions to get you started 🤸',
 			*help_text,
 			'',
-			'Try using /help <func name> for more information about the feature',
+			'Use /help <func name> for more information about the feature!',
         ])
 
         # Return full user guide if user wants help for a specific function

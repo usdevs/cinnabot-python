@@ -433,12 +433,9 @@ class NUSMap(Conversation):
         name = update.message.from_user.first_name
         with open(self.IMAGE_URLS[location], 'rb') as image:
             text = '\n'.join([
-                f'🤖: Hey {name}, heard of NUSMODs ?',
+                f'🤖: Hey {name}, here is a map of your location. Hope you may find your way around!',
                 '',
-                'It is a student intiative made to improve the lives of students!',
-                'They also have a function to help you find your way around!',
-                'Click on the link below!',
-                '',
+                'For more information, please visit',
                 self.NUSMODS_URLS[location],
             ])
             update.message.reply_photo(photo=image, caption=text, reply_markup=ReplyKeyboardRemove())

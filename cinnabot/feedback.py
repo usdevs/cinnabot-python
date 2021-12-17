@@ -76,7 +76,7 @@ class Feedback(Conversation):
     def entry(self, update: Update, context: CallbackContext):
         text = '\n'.join([
             "🤖: What will you like to give feedback for?",
-            "Use /cancel if you chicken out.",
+            "Use /cancel to exit.",
         ])
 
         reply_markup = ReplyKeyboardMarkup(

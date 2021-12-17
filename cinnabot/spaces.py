@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class Spaces(Command):
     command = 'spaces'
-    help_text = 'Details for space bookings!'
+    help_text = 'Display bookings for venues!'
     help_full = (
         "To use the '/spaces' command, type one of the following:\n"
         "'/spaces' : to view all bookings for today\n"

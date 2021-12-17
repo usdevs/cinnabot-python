@@ -138,7 +138,7 @@ class Claims(Conversation):
         context.chat_data['history'].append(self.entry)
         update.message.reply_text(
             text = (
-                'Welcome to Claimsbot, your one-stop guide to finance claiming!\n'
+                '🤖: Welcome to Claimsbot, your one-stop guide to finance claiming!\n'
                 '\n'
                 'You can file a finance claim by following these 5 simple steps!\n'
                 '\n'
