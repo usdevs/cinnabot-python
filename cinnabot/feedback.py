@@ -27,9 +27,9 @@ logger = logging.getLogger(__name__)
 class Feedback(Conversation):
 
     command = 'feedback'
-    help_text = 'to give feedback'
+    help_text = 'Give your feedback!'
     help_full = (
-        '/feedback: to give feedback'
+        '/feedback: Give your feedback!'
     )
 
     # States
@@ -75,7 +75,7 @@ class Feedback(Conversation):
 
     def entry(self, update: Update, context: CallbackContext):
         text = '\n'.join([
-            "🤖: What will you like to give feedback to?",
+            "🤖: What will you like to give feedback for?",
             "Use /cancel if you chicken out.",
         ])
 

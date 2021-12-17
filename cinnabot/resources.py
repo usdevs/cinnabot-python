@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 class Resources(Conversation):
 
     command = 'resources'
-    help_text = 'list of important resources!'
+    help_text = 'Cinnamon resources!'
     help_full = (
         "/resources <tag>: searches resources for a specific tag\n"
         "/resources: returns all tags"

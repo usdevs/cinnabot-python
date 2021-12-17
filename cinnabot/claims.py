@@ -106,8 +106,8 @@ class Reply:
 class Claims(Conversation):
 
     command = 'claimsbot'
-    help_text = 'Filling up claims do be hard sometimes...'
-    help_full = 'Filling up claims do be hard sometimes...'
+    help_text = 'Learn how to fill up and make claims!'
+    help_full = 'Learn how to fill up and make claims!'
 
     DATA = dict()
 
@@ -213,11 +213,11 @@ class Claims(Conversation):
 Claims.DATA[START] = {
     'Make a Fund Request': [
         Reply(
-            'Please head over to tinyurl.com/uspfundreq to make your fund request, '
-            'and do inform your respective Attaches via telegram once you’ve '
-            'submitted your request form!\n'
+            'Before making any purchase, please submit the NUSSync form at http://tinyurl.com/uspfundreq2122, '
+            'and inform your respective Attaches via telegram once you done, '
+            'and await their approval. Unapproved purchases can be rejected and unclaimable. \n'
             '\n'
-            'Also, which student group are you representing?',
+            'For more information about Attaches, which student group are you representing? ',
             keyboard = STUDENT_GROUP
         )
     ], 
@@ -227,15 +227,15 @@ Claims.DATA[START] = {
             photo = Path('cinnabot', 'claims', 'image0.jpg')
         ),
         Reply(
-            'This bot will provide you with a step-by-step guide to filing your student claim'
-            ' - simply select the relevant options and follow the instructions + sample documents provided!'
-            ' All documents required can be found at tinyurl.com/uspfinance .\n'
+            'I will provide you with a step-by-step guide to filing your student claim'
+            ' - simply select the relevant options and follow the instructions and sample documents provided!'
+            ' All documents required can be found at http://tinyurl.com/financedocs2122 .\n'
             '\n'
-            'To start off, all claims require you to fill up the Request for Payment Form (RFP) as below!'
-            ' But depending on the specific details of your claim,'
+            'First and foremost, all claims require you to fill up the Request for Payment Form (RFP) such as the above!'
+            ' Depending on the specific details of your claim,'
             ' you\'ll need to attach additional documents behind your RFP!\n'
             '\n'
-            'First up, what kind of purchase are you making?',
+            'Next, what kind of purchase are you making?',
             keyboard = PURCHASE_TYPE
         ),
     ],
@@ -494,7 +494,7 @@ Claims.DATA[SPECIAL_REQUEST] = {
 Claims.DATA[QUERIES] = {
     'Yes!': [
         Reply(
-            'Please direct your queries to your respective Attaches via telegram!\n'
+            'Please direct your purchases to your respective Attache(s) via telegram!\n'
             '\n'
             'Which student group are you representing?',
             keyboard = STUDENT_GROUP
@@ -509,77 +509,67 @@ Claims.DATA[QUERIES] = {
 }
 
 Claims.DATA[STUDENT_GROUP] = {
-    "Ursaia/Nocturna/Ianthe": [
+    "Ursaia/Ianthe/Ankaa": [
         Reply(
-            'Please direct your queries to your respective Attaches via telegram!\n'
+            'Please direct your purchases to your respective Attache(s) via telegram!\n'
             '\n'
-            '*Attache(s) for Ursaia/Nocturna/Ianthe*\n'
-            "Yi Jin @limyijin",
+            '*Attache(s) for Ursaia/Ianthe/Ankaa*\n'
+            "Run Feng @ChenRunfeng",
             keyboard = END,
         )
     ],
-    "Triton/Ankaa/Saren": [
+    "Nocturna/Triton/Saren": [
         Reply(
-            'Please direct your queries to your respective Attaches via telegram!\n'
+            'Please direct your purchases to your respective Attache(s) via telegram!\n'
             '\n'
-            '*Attache(s) for Triton/Ankaa/Saren*\n'
-            "Alson @alsontay",
+            '*Attache(s) for Nocturna/Triton/Saren*\n'
+            "Mikey @Mikeyzzzz",
             keyboard = END,
         )
     ],
-    "Comm Life (IG/GUI)": [
+    "Community Life": [
         Reply(
-            'Please direct your queries to your respective Attaches via telegram!\n'
+            'Please direct your purchases to your respective Attaches via telegram!\n'
             '\n'
-            '*Attache(s) for Comm Life (IG/GUI)*\n'
-            "Wei Ching @chingariro\n"
-            "Harz @mdharz",
-            keyboard = END,
-        )
-    ],
-    "FOP": [
-        Reply(
-            'Please direct your queries to your respective Attaches via telegram!\n'
-            '\n'
-            '*Attache(s) for FOP*\n'
-            "Natalie @natalieeeeee ",
+            '*Attache(s) for Community Life*\n'
+            "Wei Ming @lbj21\n"
+            "Shaun @Shaun\\_song",
             keyboard = END,
         )
     ],
     "Secretariat": [
         Reply(
-            'Please direct your queries to your respective Attaches via telegram!\n'
+            'Please direct your purchases to your respective Attaches via telegram!\n'
             '\n'
             '*Attache(s) for Secretariat*\n'
-            "Bo Xuan @tangboxuan",
+            "Keena @Keenaa\\_quaqua",
             keyboard = END,
         )
     ],
-    "Standing Comm (Advisory)": [
+    "Standing Committee": [
         Reply(
-            'Please direct your queries to your respective Attaches via telegram!\n'
+            'Please direct your purchases to your respective Attache(s) via telegram!\n'
             '\n'
-            '*Attache(s) for Standing Comm (Advisory)*\n'
-            "Jing Ying @tjingying\n"
-            "Bo Xuan @tangboxuan",
+            '*Attache(s) for Standing Committee*\n'
+            "Harz @mdharz",
             keyboard = END,
         )
     ],
     "Welfare": [
         Reply(
-            'Please direct your queries to your respective Attaches via telegram!\n'
+            'Please direct your purchases to your respective Attache(s) via telegram!\n'
             '\n'
             '*Attache(s) for Welfare*\n'
-            "Jing Ying @tjingying",
+            "Run Feng @ChenRunfeng",
             keyboard = END,
         )
     ],
     "Others": [
         Reply(
-            'Please direct your queries to your respective Attaches via telegram!\n'
+            'Please direct your purchases to your respective Attache(s) via telegram!\n'
             '\n'
             '*Attache(s) for Others*\n'
-            'Cheng Zhi @cz\\_erny',
+            'Harz @mdharz\\_erny',
             keyboard = END,
         )
     ],
@@ -588,7 +578,7 @@ Claims.DATA[STUDENT_GROUP] = {
 Claims.DATA[END] = {
     'The End!': [
         Reply(
-            'We hope to see you again soon! (Use /claimsbot to go again)',
+            'We hope to see you again soon! (Use /claimsbot to revisit)',
         ), 
     ],
 }

@@ -34,7 +34,6 @@ logger = logging.getLogger(__name__)
 # '/weather: 2h weather forecast',
 # '/spaces: list of space bookings',
 # '/feedback: to give feedback',
-# '/laundry: to check washer and dryer availability in cinnamon',
 
 class PublicBus(Command):
 
@@ -56,7 +55,7 @@ class NUSBus(Conversation):
     """
 
     command = 'nusbus'
-    help_text = 'NUS bus timings for bus stops around your location.'
+    help_text = 'NUS bus timings near your location!'
     help_full = (
         '/nusbus: NUS bus timings for bus stops around your location.\n'
         '/nusbus location: List of bus timings at your location.\n'
@@ -352,9 +351,9 @@ class NUSBus(Conversation):
 class NUSMap(Conversation):
 
     command = 'map'
-    help_text = 'to get a map of NUS if you\'re lost!'
+    help_text = 'Map of NUS if you\'re lost!'
     help_full = (
-        '/map: to get a map of NUS if you\'re lost!'
+        '/map: Map of NUS if you\'re lost!'
     )
 
     # States
