@@ -361,32 +361,27 @@ class NUSMap(Conversation):
 
     # Class helper variables
     KEYBOARD = [
-        ['Arts', 'Comp'],
-        ['Law', 'Biz'],
-        ['UTown', 'Science'],
-        ['SDE', 'YIH/Engin'],
+        ['CHS', 'Computing'],
+        ['Law', 'Business'],
+        ['UTown', 'CDE'],
     ]
 
     NUSMODS_URLS = {
-        "arts": "https://nusmods.com/venues/AS4-0602",
-        "comp": "https://nusmods.com/venues/COM1-0120",
+        "chs": "https://nusmods.com/venues/AS4-0602",
+        "computing": "https://nusmods.com/venues/COM1-0120",
         "law": "https://nusmods.com/venues" + "\n\n PS: Law venues are available under 'L'!",
-        "biz": "https://nusmods.com/venues/BIZ2-0115",
+        "business": "https://nusmods.com/venues/BIZ2-0115",
         "utown": "https://nusmods.com/venues/UT-AUD2",
-        "science": "https://nusmods.com/venues/S8-0314",
-        "sde": "https://nusmods.com/venues/SDE-ER4",
-        "yih/engin": "https://nusmods.com/venues/E3-05-21",
+        "cde": "https://nusmods.com/venues/SDE-ER4",
     }
 
     IMAGE_URLS = {
-        "arts": Path("cinnabot", "maps", "FASS Map.png"),
-        "comp": Path("cinnabot", "maps", "Computing Map.png"),
+        "chs": Path("cinnabot", "maps", "CHS Map.png"),
+        "computing": Path("cinnabot", "maps", "Computing Map.png"),
         "law": Path("cinnabot", "maps", "Law Map.png"),
-        "biz": Path("cinnabot", "maps", "Biz Map.png"),
+        "business": Path("cinnabot", "maps", "Biz Map.png"),
         "utown": Path("cinnabot", "maps", "UTown Map.png"),
-        "science": Path("cinnabot", "maps", "Science Map.png"),
-        "sde": Path("cinnabot", "maps", "SDE Map.png"),
-        "yih/engin": Path("cinnabot", "maps", "Engineering Map.png"),
+        "cde": Path("cinnabot", "maps", "CDE Map.png"),
     }
 
     TAGS = [button for row in KEYBOARD for button in row]
