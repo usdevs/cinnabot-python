@@ -37,8 +37,8 @@ class Resources(Conversation):
 
     # Class helper variables
     KEYBOARD = [
-        ['Telegram', 'Links'],
-        ['Interest Groups', 'Everything'],
+        ['Channels', 'Interest Groups'],
+        ['Check Aircon Meter', 'Care Mental Health'],
     ]
 
     TAGS = [button for row in KEYBOARD for button in row]
@@ -78,7 +78,56 @@ class Resources(Conversation):
     def get_resources(self, update: Update, context: CallbackContext):
         """Ends the user flow by sending a message with the desired resources and removing the keyboard."""
         logger.info('get_resources')
-        text = '🤖: Link this to firebase! The current json solution is not the best ):'
+        text = (
+        '🤖: Channels: \n' 
+        
+        'USChannel: t.me/USPChannel \n'
+        'CinnaSpaces Channel: t.me/cinnaspaces \n'
+        '\n'
+        '🤖: Interest Groups: \n'
+        
+        'USProductions Broadcast: t.me/usprods \n'
+        'USPTrug: http://t.me/joinchat/DCoM1EmE53iMY1EynR17Cw \n'
+        'USFellowship: https://t.me/joinchat/1uEBsAY_GCAzZjc1 \n'
+        'USPlanet: https://t.me/joinchat/UKa-ukjdAGtYLwow \n'
+        'USP Netball: https://t.me/joinchat/MohGrU1ncc1WJCKgcNNQcw \n'
+        'USP Tchoukball: https://t.me/joinchat/SqNtaymmWK81ZGQ9 \n'
+        'Vibe!: https://bit.ly/3hKuQvH \n'
+        'LiveCore!: http://t.me/welcome2livecore \n'
+        'USPike: https://t.me/joinchat/U6IbNZtPikUoQOhB \n'
+        'The Cinnamon Conversation: https://t.me/TheCinnamonConversation \n'
+        'USPaper: https://t.me/uspaper \n'
+        'USP Badminton: https://t.me/joinchat/JJNb11U7qurTYLzbfXahFg \n'
+        'USP Basketball: https://t.me/joinchat/T2vwq8lCj48vKovY \n'
+        'Cinnamon Roll: https://t.me/cinnaroll2021 \n'
+        'Floorball: https://t.me/joinchat/TzBHhBgNOsTlMYCF \n'
+        'USClimbing: https://t.me/joinchat/GYW3Z_nroERLUkyL \n'
+        'USContract Bridge: https://t.me/joinchat/FHPwCl0xTuY0MWY9 \n'
+        'Gender Collective: http://bit.ly/gctele19 \n'
+        'USProvisions: http://t.me/joinchat/5RhX1IhiQuRlZDg1 \n'
+        'USDeduction: https://tinyurl.com/usdeduction \n'
+        'Smol Singlit: https://t.me/joinchat/LcQBHhG_3ewwNWRl \n'
+        'Dodgeball: https://t.me/joinchat/ROaPIYuGO9phNzdl \n'
+        'USPlash: https://t.me/joinchat/UrToYxLM4I3PZtxU \n'
+        'Tennis: https://t.me/joinchat/JCHW8MeY-s4wM2U1 \n'
+        'Track: https://t.me/joinchat/SUDh_IPV0v0lqNm2 \n'
+        'USKick: https://t.me/joinchat/RQH3JI1naeY3GmX8 \n'
+        'USR: https://t.me/joinchat/DCqh_k7vnj8IVcry7bvy_Q \n'
+        'USP Tabletop: http://tinyurl.com/usptabletop \n'
+        'USMinecraft: https://t.me/joinchat/SdaIKhTb5PWmoF91 \n'
+        'USPingpong: https://t.me/joinchat/FKgI2N08iNG5VT1r \n'
+        'UStetris: https://t.me/joinchat/dXK4mego_5NlZGRl \n'
+        'USSally:https://t.me/joinchat/UHzMoqFV3mPD-nwD \n'
+        '\n'
+        '🤖: Check Aircon Meter: \n'
+        'Check how much aircon credits you left so you can top up in time! \n'
+        'Use Aircon Meter: @@nussirconbot (credits to Sajal Vaishnav) \n'
+        '\n'
+        '🤖: Care Mental Health : \n'
+        'As you study, do take care of your mental health! \n'
+        'Use Mental Health: @asafespacebot (credits to Love, USP) \n'
+        '\n'
+        )
         update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
         return ConversationHandler.END
 
