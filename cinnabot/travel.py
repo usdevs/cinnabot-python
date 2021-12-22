@@ -55,7 +55,7 @@ class NUSBus(Conversation):
     """
 
     command = 'nusbus'
-    help_text = 'NUS bus timings near your location!'
+    help_text = 'NUS bus timings near you!'
     help_full = (
         '/nusbus: NUS bus timings for bus stops around you.\n'
         '/nusbus location: List of bus timings at you.\n'

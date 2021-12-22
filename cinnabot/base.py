@@ -18,7 +18,7 @@ class Start(Command):
             f'Hello there {name}!',
             '',
             'I am Cinnabot🤖, made by my owners to serve the residents of Cinnamon College!',
-            'I am always here to /help you with what you need!',
+            'Let me /help you with what you need!',
         ])
         update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
 
@@ -33,22 +33,22 @@ class About(Command):
         text = '\n'.join([
             # text := fmt.Sprintf("Cinnabot %v\n", os.Getenv("COMMITHEAD"))
             # text += fmt.Sprintf("Last updated %v\n", os.Getenv("LASTUPDATED"))
-            '🤖: Here are the relevant links you will need:',
+            '🤖: Here are the relevant links you need:',
             '',
-            'Link to Repository: https://github.com/usdevs/cinnabot-python', 
-            'Link to USC Website: https://nususc.com/',
-            'Link to Luminus: https://luminus.nus.edu.sg/',
-            'Link to EduRec: https://myedurec.nus.edu.sg/',
-            'Link to NUSMods: https://nususc.com/',
-            'Link to uNivUS: ',
-            'https://play.google.com/store/apps/details?id=sg.edu.nus.univus (Google Play)',
-            'https://apps.apple.com/us/app/univus/id1508660612 (App Store)',
-            'Link to NUS Hostel Dining: ',
-            'https://play.google.com/store/apps/details?id=com.neseapl.nus.dining.system (Google Play)',
-            'https://apps.apple.com/gb/app/nus-hostel-dining/id1519951130 (App Store)',
-            'Link to NUS NextBus: ',
-            'https://play.google.com/store/apps/details?id=nus.ais.mobile.android.shuttlebus (Google Play)',
-            'https://apps.apple.com/sg/app/nus-nextbus/id542131822 (App Store)',
+            'Repository: https://github.com/usdevs/cinnabot-python', 
+            'USC Website: https://nususc.com/',
+            'Luminus: https://luminus.nus.edu.sg/',
+            'EduRec: https://myedurec.nus.edu.sg/',
+            'NUSMods: https://nususc.com/',
+            'uNivUS: ',
+            'Google Play - https://play.google.com/store/apps/details?id=sg.edu.nus.univus',
+            'App Store - https://apps.apple.com/us/app/univus/id1508660612',
+            'NUS Hostel Dining: ',
+            'Google Play - https://play.google.com/store/apps/details?id=com.neseapl.nus.dining.system',
+            'App Store - https://apps.apple.com/gb/app/nus-hostel-dining/id1519951130',
+            'NUS NextBus: ',
+            'Google Play - https://play.google.com/store/apps/details?id=nus.ais.mobile.android.shuttlebus',
+            'App Store - https://apps.apple.com/sg/app/nus-nextbus/id542131822',
         ])
         update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
 
