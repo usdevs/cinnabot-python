@@ -105,9 +105,9 @@ class Reply:
 
 class Claims(Conversation):
 
-    command = 'claimsbot'
-    help_text = 'Learn how to fill up and make claims!'
-    help_full = 'Learn how to fill up and make claims!'
+    command = 'claims'
+    help_text = 'Learn to fill up and make claims!'
+    help_full = 'Learn to fill up and make claims!'
 
     DATA = dict()
 
@@ -138,7 +138,7 @@ class Claims(Conversation):
         context.chat_data['history'].append(self.entry)
         update.message.reply_text(
             text = (
-                '🤖: Welcome to Claimsbot, your one-stop guide to finance claiming!\n'
+                '🤖: Welcome to Claims, your one-stop guide to finance claiming!\n'
                 '\n'
                 'You can file a finance claim by following these 5 simple steps!\n'
                 '\n'
@@ -167,13 +167,13 @@ class Claims(Conversation):
         return next_state
 
     def cancel(self, update: Update, context: CallbackContext):
-        """Panic button to kill claimsbot ):"""
+        """Panic button to kill claims ):"""
         return ConversationHandler.END
 
     def error(self, update: Update, context: CallbackContext):
         logger.error(f'{update.message.from_user.id}: "{update.message.text}"')
         update.message.reply_text(
-            text = 'Sorry! I didn\'t understand you. (use /cancel to exit claimsbot)'
+            text = 'Sorry! I didn\'t understand you. (use /cancel to exit claims)'
         )
 
     def _make_callback(self, user_input, replies):
@@ -502,7 +502,7 @@ Claims.DATA[QUERIES] = {
     ], 
     'Nope :D': [
         Reply(
-            'Thank you for using Claimsbot!',
+            'Thank you for using Claims!',
             keyboard = END,
         ),
     ],
@@ -578,7 +578,7 @@ Claims.DATA[STUDENT_GROUP] = {
 Claims.DATA[END] = {
     'The End!': [
         Reply(
-            'We hope to see you again soon! (Use /claimsbot to revisit)',
+            'We hope to see you again soon! (Use /claims to revisit)',
         ), 
     ],
 }

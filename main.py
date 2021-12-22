@@ -23,15 +23,13 @@ firestore = Client(
 FEATURES = [
 	Start(), 
 	About(),
-	Help(),
-	Claims(),
-	Feedback(),
-	# Laundry(),
-	Resources(),
 	Spaces(database=firestore),
-	# PublicBus(), 
-	NUSBus(),
+	Claims(),
 	NUSMap(),
+	Feedback(),
+	Resources(),
+	NUSBus(),
+	Help(),
 ]
 
 def make_cinnabot(token):
