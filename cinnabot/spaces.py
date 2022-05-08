@@ -24,8 +24,8 @@ class Spaces(Command):
         "'/spaces' : to view all bookings for today\n"
         "'/spaces now' : to view bookings active at this very moment\n"
         "'/spaces week' : to view all bookings for this week\n"
-        "'/spaces dd/mm(/yy)' : to view all bookings on a specific day\n"
-        "'/spaces dd/mm(/yy) dd/mm(/yy)' : to view all bookings in a specific range of dates"
+        "'/spaces dd/mm/yy' : to view all bookings on a specific day\n"
+        "'/spaces dd/mm/yy dd/mm/yy' : to view all bookings in a specific range of dates"
     )
 
     def __init__(self, database: Client):
@@ -64,7 +64,9 @@ class Spaces(Command):
             f'Displaying bookings for today',
             '',
             self._format_events(events),
+            '',
         ])
+        text += "More commands:\n" + "'/spaces' : bookings for today\n" + "'/spaces now' : bookings active now\n" + "'/spaces week' : bookings for the week\n" + "'/spaces dd/mm/yy' : for a specific day\n" + "'/spaces dd/mm/yy dd/mm/yy' : for a period"
         update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
 
     def spaces_now(self, update: Update, context: CallbackContext):
@@ -76,7 +78,9 @@ class Spaces(Command):
             f'Displaying ongoing bookings',
             '',
             self._format_events(events),
+            '',
         ])
+        text += "More commands:\n" + "'/spaces' : bookings for today\n" + "'/spaces now' : bookings active now\n" + "'/spaces week' : bookings for the week\n" + "'/spaces dd/mm/yy' : for a specific day\n" + "'/spaces dd/mm/yy dd/mm/yy' : for a period"
         update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
 
     def spaces_week(self, update: Update, context: CallbackContext):
@@ -90,7 +94,9 @@ class Spaces(Command):
             f'Displaying bookings up to a week from today',
             '',
             self._format_events(events),
+            '',
         ])
+        text += "More commands:\n" + "'/spaces' : bookings for today\n" + "'/spaces now' : bookings active now\n" + "'/spaces week' : bookings for the week\n" + "'/spaces dd/mm/yy' : for a specific day\n" + "'/spaces dd/mm/yy dd/mm/yy' : for a period"
         update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
 
     def spaces_day(self, update: Update, context: CallbackContext):
@@ -101,7 +107,7 @@ class Spaces(Command):
             day = self._format_day_string(day_str)
         except (ValueError, TypeError) as e:
             logger.error(e)
-            update.message.reply_text("Sorry that's an invalid date! Try dd/mm(/yy) instead :)")
+            update.message.reply_text("Sorry that's an invalid date! Try dd/mm/yy instead :)")
             return
         
         day_later = day + timedelta(days=1)
@@ -110,7 +116,9 @@ class Spaces(Command):
             f'Displaying bookings for {day.date()}',
             '',
             self._format_events(events),
+            '',
         ])
+        text += "More commands:\n" + "'/spaces' : bookings for today\n" + "'/spaces now' : bookings active now\n" + "'/spaces week' : bookings for the week\n" + "'/spaces dd/mm/yy' : for a specific day\n" + "'/spaces dd/mm/yy dd/mm/yy' : for a period"
         update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
 
     def spaces_date_range(self, update: Update, context: CallbackContext):
@@ -122,7 +130,7 @@ class Spaces(Command):
             end_date = self._format_day_string(date_range[1])
         except (ValueError, TypeError) as e:
             logger.error(e)
-            update.message.reply_text("Sorry that's an invalid date! Try dd/mm(/yy) instead :)")
+            update.message.reply_text("Sorry that's an invalid date! Try dd/mm/yy instead :)")
             return
         
         events = self._events_between(start_date, end_date)
@@ -131,6 +139,7 @@ class Spaces(Command):
             '',
             self._format_events(events),
         ])
+        text += "More commands:\n" + "'/spaces' : bookings for today\n" + "'/spaces now' : bookings active now\n" + "'/spaces week' : bookings for the week\n" + "'/spaces dd/mm/yy' : for a specific day\n" + "'/spaces dd/mm/yy dd/mm/yy' : for a period"
         update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
         
     def _events_between(self, start_time: datetime, end_time: datetime):

@@ -14,11 +14,18 @@ class Start(Command):
     
     def callback(self, update: Update, context: CallbackContext):
         name = update.message.from_user.first_name
+        help_dict = context.bot_data['help_text']
+        help_text = [f'/{function}: {help}' for function, help in help_dict.items()]
         text = '\n'.join([
-            f'Hello there {name}!',
+            f'Hello there NUSC {name}!',
             '',
-            'I am Cinnabot🤖, made by my owners to serve the residents of Cinnamon College!',
-            'Let me /help you with what you need!',
+            'I am Cinnabot🤖, to serve the residents of NUS College!',
+        ])
+        text += '\n'.join([
+            ' Here are a some things I can do for you!\n',
+			*help_text,
+			'',
+			'Use /help <feature name> for more details!',
         ])
         update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
 
@@ -26,26 +33,29 @@ class Start(Command):
 class About(Command):
 
     command = 'about'
-    help_text = 'Links about USP and NUS!'
+    help_text = 'Useful links for NUS and NUSC!'
     help_full = '/about links you to the repository for our code (:'
 
     def callback(self, update: Update, context: CallbackContext):
         text = '\n'.join([
-            # text := fmt.Sprintf("Cinnabot %v\n", os.Getenv("COMMITHEAD"))
-            # text += fmt.Sprintf("Last updated %v\n", os.Getenv("LASTUPDATED"))
-            '🤖: Here are the relevant links you need:',
+            '🤖: Here are the links you may need:',
             '',
-            'Repository: https://github.com/usdevs/cinnabot-python', 
-            'USC Website: https://nususc.com/',
-            'Luminus: https://luminus.nus.edu.sg/',
+            'LumiNUS: https://luminus.nus.edu.sg/',
             'EduRec: https://myedurec.nus.edu.sg/',
             'NUSMods: https://nususc.com/',
+            'NUSC Web: https://nuscollege.nus.edu.sg/',
+            'USC Web: https://nususc.com/',
+            '',
+            '🤖: Here are the apps you may need:',
+            '',
             'uNivUS: ',
             'Google Play - https://play.google.com/store/apps/details?id=sg.edu.nus.univus',
             'App Store - https://apps.apple.com/us/app/univus/id1508660612',
+            '',
             'NUS Hostel Dining: ',
             'Google Play - https://play.google.com/store/apps/details?id=com.neseapl.nus.dining.system',
             'App Store - https://apps.apple.com/gb/app/nus-hostel-dining/id1519951130',
+            '',
             'NUS NextBus: ',
             'Google Play - https://play.google.com/store/apps/details?id=nus.ais.mobile.android.shuttlebus',
             'App Store - https://apps.apple.com/sg/app/nus-nextbus/id542131822',
@@ -57,17 +67,16 @@ class Help(Command):
     
     command = 'help'
     help_text = 'Let me help you!'
-    help_full = 'Use /help <feature name> for more information!'
+    help_full = 'Use /help <feature name> for more details!'
 
     def callback(self, update: Update, context: CallbackContext):
-        # Default help text 
         help_dict = context.bot_data['help_text']
         help_text = [f'/{function}: {help}' for function, help in help_dict.items()]
         text = '\n'.join([
-            'Here are a list of functions to get you started 🤸',
+            'Here are a some things I can do for you!',
 			*help_text,
 			'',
-			'Use /help <feature name> for more information!',
+			'Use /help <feature name> for more details!',
         ])
 
         # Return full user guide if user wants help for a specific function

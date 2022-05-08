@@ -8,7 +8,7 @@ from cinnabot.feedback import Feedback
 # from cinnabot.laundry import Laundry
 from cinnabot.resources import Resources
 from cinnabot.spaces import Spaces
-from cinnabot.travel import PublicBus, NUSBus, NUSMap 
+from cinnabot.travel import NUSMap 
 from google.cloud.firestore import Client
 from google.auth.credentials import AnonymousCredentials
 
@@ -28,7 +28,6 @@ FEATURES = [
 	NUSMap(),
 	Feedback(),
 	Resources(),
-	NUSBus(),
 	Help(),
 ]
 
@@ -40,9 +39,6 @@ def make_cinnabot(token):
 	# The dispatcher routes updates to the first matching handler
 	for feature in FEATURES:
 		updater.dispatcher.add_handler(feature.handler)
-
-	# Ad-hoc handler registration for inline keyboards ):
-	updater.dispatcher.add_handler(CallbackQueryHandler(NUSBus().refresh, pattern='^NUSBus.refresh.*$'))
 
 	# Store data for /help and /help <feature> in the bot
 	updater.dispatcher.bot_data['help_text'] = dict()
