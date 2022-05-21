@@ -17,7 +17,7 @@ class Start(Command):
         help_dict = context.bot_data['help_text']
         help_text = [f'/{function}: {help}' for function, help in help_dict.items()]
         text = '\n'.join([
-            f'Hello there NUSC {name}!',
+            f'How may I help you NUSC {name}?',
             '',
             'I am Cinnabot🤖, to serve the residents of NUS College!',
         ])
@@ -43,6 +43,7 @@ class About(Command):
             'LumiNUS: https://luminus.nus.edu.sg/',
             'EduRec: https://myedurec.nus.edu.sg/',
             'NUSMods: https://nususc.com/',
+            'USP Academic Semester Timetable: https://www.usp.nus.edu.sg/curriculum/module-timetable/',
             'NUSC Web: https://nuscollege.nus.edu.sg/',
             'USC Web: https://nususc.com/',
             '',

@@ -38,7 +38,7 @@ class Resources(Conversation):
     # Class helper variables
     KEYBOARD = [
         ['Channels', 'Interest Groups'],
-        ['Check Aircon Meter', 'Care Mental Health'],
+        ['Book a Venue', 'Care Mental Health']
     ]
 
     TAGS = [button for row in KEYBOARD for button in row]
@@ -60,6 +60,11 @@ class Resources(Conversation):
                 MessageHandler(Filters.text, self.error),
             ],
         )
+
+
+
+
+
 
     def entry(self, update: Update, context: CallbackContext):
         """Starts a user flow for /resources"""
@@ -119,13 +124,12 @@ class Resources(Conversation):
         'UStetris: https://t.me/joinchat/dXK4mego_5NlZGRl \n'
         'USSally:https://t.me/joinchat/UHzMoqFV3mPD-nwD \n'
         '\n'
-        '🤖: Check Aircon Meter: \n'
-        'Check how much aircon credits you left so you can top up in time! \n'
-        'Use Aircon Meter: @@nussirconbot (credits to Sajal Vaishnav) \n'
-        '\n'
         '🤖: Care Mental Health : \n'
         'As you study, do take care of your mental health! \n'
         'Use Mental Health: @asafespacebot (credits to Love, USP) \n'
+        '\n'
+        '🤖: Book a Venue : \n'
+        'https://nususc.com/createevent \n'
         '\n'
         )
         update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())

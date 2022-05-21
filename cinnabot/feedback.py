@@ -91,7 +91,7 @@ class Feedback(Conversation):
             text = "[Office of Housing Services Feedback]: https://bit.ly/faultycinnamon"
         
         if target == "university scholars club":
-            text += "\n(Indicate which stall you ate and whether it was Breakfast or Dinner)"
+            text += "[USC Site Feedback]: https://nususc.com/feedback"
 
         update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
         return ConversationHandler.END

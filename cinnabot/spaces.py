@@ -14,6 +14,8 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
+
+
 logger = logging.getLogger(__name__)
 
 class Spaces(Command):
@@ -27,6 +29,7 @@ class Spaces(Command):
         "'/spaces dd/mm/yy' : to view all bookings on a specific day\n"
         "'/spaces dd/mm/yy dd/mm/yy' : to view all bookings in a specific range of dates"
     )
+
 
     def __init__(self, database: Client):
         self.db = database
