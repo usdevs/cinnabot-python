@@ -46,6 +46,8 @@ class About(Command):
             'USP Academic Semester Timetable: https://www.usp.nus.edu.sg/curriculum/module-timetable/',
             'NUSC Web: https://nuscollege.nus.edu.sg/',
             'USC Web: https://nususc.com/',
+            'UHMS Portal: https://uhms.nus.edu.sg/StudentPortal/6B6F7C08/8/238/Home-Home_'
+            '',
             '',
             '🤖: Here are the apps you may need:',
             '',
