@@ -89,7 +89,7 @@ class Supper(Conversation):
             '\n'
             'Mc Donalds: \n https://www.mcdelivery.com.sg/sg/ \n'
             '\n'
-            'Your Delivery Address is: \n - 18 College Ave E, Cinnamon West Learn Lobe, Singapore 138593 (Cinnamon) \n - 16 College Ave West, Singapore 138527 (West) \n'
+            'Your Delivery Address is: \n - 18 College Ave East,  Singapore 138593 (Cinnamon) \n - 16 College Ave West, Singapore 138527 (West) \n'
         )
         update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
         return ConversationHandler.END
