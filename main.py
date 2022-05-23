@@ -5,10 +5,10 @@ from telegram.ext import PicklePersistence, Updater, CallbackQueryHandler
 from cinnabot.base import Start, About, Help
 from cinnabot.claims import Claims
 from cinnabot.feedback import Feedback
-# from cinnabot.laundry import Laundry
 from cinnabot.resources import Resources
 from cinnabot.spaces import Spaces
-from cinnabot.travel import NUSMap 
+from cinnabot.travel import NUSMap
+from cinnabot.supper import Supper
 from google.cloud.firestore import Client
 from google.auth.credentials import AnonymousCredentials
 
@@ -25,9 +25,10 @@ FEATURES = [
 	About(),
 	Spaces(database=firestore),
 	Claims(),
-	NUSMap(),
-	Feedback(),
 	Resources(),
+	Feedback(),
+	Supper(),
+	NUSMap(),
 	Help(),
 ]
 

@@ -61,11 +61,6 @@ class Resources(Conversation):
             ],
         )
 
-
-
-
-
-
     def entry(self, update: Update, context: CallbackContext):
         """Starts a user flow for /resources"""
         logger.info('entry')
