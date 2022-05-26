@@ -62,6 +62,11 @@ class About(Command):
             'NUS NextBus: ',
             'Google Play - https://play.google.com/store/apps/details?id=nus.ais.mobile.android.shuttlebus',
             'App Store - https://apps.apple.com/sg/app/nus-nextbus/id542131822',
+            '',
+            'NUS ResLife: ',
+            'Google Play - https://play.google.com/store/apps/details?id=com.guidebook.apps.NUSResLife.android&hl=en_SG',
+            'App Store - https://apps.apple.com/sg/app/nus-residential-life/id1142053403',
+            '',
         ])
         update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
 
