@@ -1,4 +1,5 @@
 import logging
+import random
 
 from telegram import (
     ReplyKeyboardMarkup,
@@ -38,7 +39,8 @@ class Supper(Conversation):
     KEYBOARD = [
         ['SuperSnacks UTown'],
         ['Al Amaan Restaurant'],
-        ['Mc Donalds']
+        ['McDonalds'],
+        ['Randomiser']
     ]
 
     TAGS = [button for row in KEYBOARD for button in row]
@@ -80,23 +82,31 @@ class Supper(Conversation):
     def get_shops(self, update: Update, context: CallbackContext):
         """Ends the user flow by sending a message with the desired shops and removing the keyboard."""
         logger.info('get_shops')
+        KEYBOARD = ['SuperSnacks UTown', 'Al Amaan Restaurant', 'McDonalds']
+        random_choice = random.choice(KEYBOARD)
+
         text = (
-            f'🤖: Here are your Menu and Order Forms! \n'
+            f'Your supper will be from ' + random_choice + '!'
+            '\n'
+            '\n'
+            '🤖: Here are your Menu and Order Forms! \n'
             '\n'
             'Super Snacks UTown: \n https://www.yqueue.co/sg/menu/supersnacks-nus-u-town \n'
             '\n'
             'Al Amaan Restaurant: \n https://alamaanrestaurant.com/order/ \n'
             '\n'
-            'Mc Donalds: \n https://www.mcdelivery.com.sg/sg/ \n'
+            'McDonalds: \n https://www.mcdelivery.com.sg/sg/ \n'
             '\n'
             'Your Delivery Address is: \n - 18 College Ave East,  Singapore 138593 (Cinnamon) \n - 16 College Ave West, Singapore 138527 (West) \n'
         )
+
         update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
-        return ConversationHandler.END
+        return ConversationHandler.END   
 
     def cancel(self, update: Update, context: CallbackContext):
         """Ends the user flow by removing the keyboard."""
         logger.info('cancel')
         text = '🤖: Function /supper cancelled!'
         update.message.reply_text(text)
-        return ConversationHandler.END
+        return ConversationHandler.END    
+   
