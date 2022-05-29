@@ -10,7 +10,7 @@ Cinnabot-python is the codebase for @cinnabot, a Telegram bot that assists NUSC 
 
 **resources.py**: Instructions for _/resources_, which provides users 4 key buttons to pick from: Channels, Interest Groups, Check Aircon Meter and Care Mental Health. Resources are provided for each of these areas through relevant links to NUSC channels, interest groups, aircon meter bot (@nusairconbot) and mental health bot (@asafespacebot).  
 
-**spaces.py**: Instructions for _/spaces_, including drawing out data from an internal database of bookings so that users can view all bookings. Users are able to display bookings now, this week, a specific day or across a specific range of dates.
+**spaces.py**: Instructions for _/spaces_, including drawing out data from an internal database of bookings so that users can view all bookings. Users are able to display bookings now, this week, a specific day or across a specific range of dates, as well as directly make bookings.
 
 **travel.py**: Instructions for _/map_ which provides users with a map of the area of NUS that they are in.
 
