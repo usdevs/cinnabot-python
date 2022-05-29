@@ -2,7 +2,7 @@
 Cinnabot-python is the codebase for @cinnabot, a Telegram bot that assists NUSC students with their day-to-day needs. Please note that there is a previous codebase named "cinnabot", but that has been made redundant due to the rewriting of all the code into Python. Therefore, only this codebase is kept up to date.
 
 
-**base.py**: Provides instructions and content for commands _/start_, _/about_ and _/help _in Cinnabot. _/about_ provides a useful list of weblinks and residential living apps for NUSC students. _/help_ provides users more information on the various features of Cinnabot.
+**base.py**: Provides instructions and content for commands _/start_, _/about_ and _/help_ in Cinnabot. _/about_ provides a useful list of weblinks and residential living apps for NUSC students. _/help_ provides users more information on the various features of Cinnabot.
 
 **claims.py**: Instructions for _/claims_, guiding users to follow a constrained list of steps to submit claims for reimbursements and fund requests at NUSC.
 
