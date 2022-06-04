@@ -38,7 +38,7 @@ class Resources(Conversation):
     # Class helper variables
     KEYBOARD = [
         ['Channels', 'Interest Groups'],
-        ['Check Aircon Meter', 'Care Mental Health'],
+        ['Check Aircon Meter', 'Care Mental Health', 'Social Media Links'],
     ]
 
     TAGS = [button for row in KEYBOARD for button in row]
@@ -123,9 +123,14 @@ class Resources(Conversation):
         'Check how much aircon credits you left so you can top up in time! \n'
         'Use Aircon Meter: @@nussirconbot (credits to Sajal Vaishnav) \n'
         '\n'
-        '🤖: Care Mental Health : \n'
+        '🤖: Care Mental Health: \n'
         'As you study, do take care of your mental health! \n'
         'Use Mental Health: @asafespacebot (credits to Love, USP) \n'
+        '\n'
+        '🤖: Social Media Links: \n'
+        'Facebook: https://www.facebook.com/nuscollege/ \n'
+        'LinkedIn: https://www.linkedin.com/company/nus-college/about/ \n'
+        'YouTube: https://www.youtube.com/channel/UC0m6Dvm5ZrQztv9sngQMOCw \n'
         '\n'
         )
         update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())

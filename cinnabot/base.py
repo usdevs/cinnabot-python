@@ -45,6 +45,7 @@ class About(Command):
             'NUSMods: https://nususc.com/',
             'NUSC Web: https://nuscollege.nus.edu.sg/',
             'USC Web: https://nususc.com/',
+            'Office of Housing Services: https://uci.nus.edu.sg/ohs/'
             '',
             '🤖: Here are the apps you may need:',
             '',
