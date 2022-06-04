@@ -118,6 +118,7 @@ class Resources(Conversation):
         'USPingpong: https://t.me/joinchat/FKgI2N08iNG5VT1r \n'
         'UStetris: https://t.me/joinchat/dXK4mego_5NlZGRl \n'
         'USSally:https://t.me/joinchat/UHzMoqFV3mPD-nwD \n'
+        'USoccer: https://t.me/+x75hyipDh5kyOWQ1'
         '\n'
         '🤖: Care Mental Health : \n'
         'As you study, do take care of your mental health! \n'
