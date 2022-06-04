@@ -38,7 +38,7 @@ class About(Command):
 
     def callback(self, update: Update, context: CallbackContext):
         text = '\n'.join([
-            '🤖: Here are the links you may need:',
+            '🤖: Here are some NUS links you may need:',
             '',
             'LumiNUS: https://luminus.nus.edu.sg/',
             'EduRec: https://myedurec.nus.edu.sg/',
@@ -49,7 +49,7 @@ class About(Command):
             'UHMS Portal: https://uhms.nus.edu.sg/StudentPortal/6B6F7C08/8/238/Home-Home_'
             '',
             '',
-            '🤖: Here are the apps you may need:',
+            '🤖: Here are some NUS apps you may need:',
             '',
             'uNivUS: ',
             'Google Play - https://play.google.com/store/apps/details?id=sg.edu.nus.univus',
@@ -67,6 +67,14 @@ class About(Command):
             'Google Play - https://play.google.com/store/apps/details?id=com.guidebook.apps.NUSResLife.android&hl=en_SG',
             'App Store - https://apps.apple.com/sg/app/nus-residential-life/id1142053403',
             '',
+            '🤖: Here are some NUSC social media links you may need:',
+            '',
+            'NUSC:',
+            'Instagram - https://www.instagram.com/nuscollege/?hl=en',
+            'YouTube - https://www.youtube.com/channel/UC0m6Dvm5ZrQztv9sngQMOCw/featured',
+            'Facebook - https://www.facebook.com/nuscollege/',
+            'LinkedIn - https://www.linkedin.com/company/nus-college/about/',
+            '',                        
         ])
         update.message.reply_text(text, reply_markup=ReplyKeyboardRemove())
 

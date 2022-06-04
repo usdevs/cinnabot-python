@@ -1,0 +1,5 @@
+{
+    "telegram_bot_token": "Enter telegram bot token",
+    "persistence_file": "db.p",
+    "firebase_project_id": "cinnabot-test"
+}
