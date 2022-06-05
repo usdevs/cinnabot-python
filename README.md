@@ -16,14 +16,3 @@ Cinnabot-python is the codebase for @cinnabot, a Telegram bot that assists NUSC 
 
 **utils.py**: Contains Abstract Base Classes (ABCs) (code structures) that developers should follow and utilise for any coding through cinnabot-python.
 
-
-
-**How to make edits to cinnabot-python?**
-1. Do a git clone of the repository to your own text editor
-2. Create a new branch under your name, and git checkout from the master branch to your own branch
-3. Type _pip install python-telegram-bot_ and _pip install google-cloud-firestore_ in the Terminal to download the needed packages beforehand.
-4. Change tab name of _config.json.example_ to _config.json_.
-5. Go to @BotFather on Telegram and create a new bot by sending _/newbot_. You will be prompted to give a Telegram bot Name and username. Pick anything you like. After which, you will receive an HTTP API key from BotFather.
-6. Replace _Enter telegram bot token_ in _config.json_ with this HTTP API key.
-7. Type _python main.py_ in the Terminal to activate your new bot. If this does not work, make sure you have downloaded the latest version of Python in your laptop.
-8. Use your new bot as a sandbox. Upon making any code changes, check that it works on your own bot before git pushing changes to the master branch.
