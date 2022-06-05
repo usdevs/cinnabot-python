@@ -14,6 +14,8 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
+
+
 logger = logging.getLogger(__name__)
 
 class Spaces(Command):
@@ -28,11 +30,15 @@ class Spaces(Command):
         "'/spaces dd/mm/yy dd/mm/yy' : to view all bookings in a specific range of dates"
     )
 
+
     def __init__(self, database: Client):
         self.db = database
-
+        
+        
     def callback(self, update: Update, context: CallbackContext):
         """Delegates behaviour to sub-handlers depending on input format"""
+
+       
         # /spaces
         if not context.args:
             self.spaces(update, context)
@@ -61,12 +67,17 @@ class Spaces(Command):
         
         events = self._events_between(today, tomorrow)
         text = '\n'.join([
-            f'Displaying bookings for today',
+            f'*Displaying bookings for today:*',
             '',
             self._format_events(events),
             '',
+            f'*Book a Venue*: \n'
+            'https://nususc.com/createevent \n'
+            '\n'
+            '',
+
         ])
-        text += "More commands:\n" + "'/spaces' : bookings for today\n" + "'/spaces now' : bookings active now\n" + "'/spaces week' : bookings for the week\n" + "'/spaces dd/mm/yy' : for a specific day\n" + "'/spaces dd/mm/yy dd/mm/yy' : for a period"
+        text += "*More commands:*\n" + "'/spaces' : bookings for today\n" + "'/spaces now' : bookings active now\n" + "'/spaces week' : bookings for the week\n" + "'/spaces dd/mm/yy' : for a specific day\n" + "'/spaces dd/mm/yy dd/mm/yy' : for a period"
         update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
 
     def spaces_now(self, update: Update, context: CallbackContext):

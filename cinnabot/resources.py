@@ -38,7 +38,11 @@ class Resources(Conversation):
     # Class helper variables
     KEYBOARD = [
         ['Channels', 'Interest Groups'],
+<<<<<<< HEAD
         ['Check Aircon Meter', 'Care Mental Health', 'Social Media Links'],
+=======
+        ['Care Mental Health']
+>>>>>>> origin
     ]
 
     TAGS = [button for row in KEYBOARD for button in row]
@@ -118,10 +122,7 @@ class Resources(Conversation):
         'USPingpong: https://t.me/joinchat/FKgI2N08iNG5VT1r \n'
         'UStetris: https://t.me/joinchat/dXK4mego_5NlZGRl \n'
         'USSally:https://t.me/joinchat/UHzMoqFV3mPD-nwD \n'
-        '\n'
-        '🤖: Check Aircon Meter: \n'
-        'Check how much aircon credits you left so you can top up in time! \n'
-        'Use Aircon Meter: @@nussirconbot (credits to Sajal Vaishnav) \n'
+        'USoccer: https://t.me/+x75hyipDh5kyOWQ1'
         '\n'
         '🤖: Care Mental Health: \n'
         'As you study, do take care of your mental health! \n'
