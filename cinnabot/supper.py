@@ -42,7 +42,7 @@ class Reply:
 
     def reply_to(self, message: Message):
         if self.keyboard is not None:
-            message.reply_markdown(
+            message.reply_html(
                 text = self.text,
                 reply_markup = ReplyKeyboardMarkup(
                     keyboard = [[button] for button in Supper.DATA[self.keyboard]] + [['Back']],
@@ -65,11 +65,11 @@ class Supper(Conversation):
     MENU = ''
     RANDOM_CHOICE = random.choice(choices)
     if (RANDOM_CHOICE == 'SuperSnacks UTown'):
-        MENU = 'Super Snacks UTown: \n https://www.yqueue.co/sg/menu/supersnacks-nus-u-town \n'
+        MENU = 'https://www.yqueue.co/sg/menu/supersnacks-nus-u-town'
     elif (RANDOM_CHOICE == 'Al Amaan Restaurant'):
-        MENU = 'Al Amaan Restaurant: \n https://alamaanrestaurant.com/order/ \n'
+        MENU = 'https://alamaanrestaurant.com/order/'
     elif (RANDOM_CHOICE == 'McDonalds'):
-        MENU = 'McDonalds: \n https://www.mcdelivery.com.sg/sg/ \n'
+        MENU = 'https://www.mcdelivery.com.sg/sg/'
 
     @property
     def handler(self):
@@ -160,23 +160,26 @@ class Supper(Conversation):
         return handlers
 
 Supper.DATA[SHOP] = {
-    'I will decide by myself!': [
+    'I will decide!': [
         Reply(
-            '🤖: Here are your Menu and Order Forms! \n'
+            '🤖: Here are your Menu & Order Forms! \n'
             '\n'
-            'Super Snacks UTown: \n https://www.yqueue.co/sg/menu/supersnacks-nus-u-town \n'
+            '<a href="https://www.yqueue.co/sg/menu/supersnacks-nus-u-town">Super Snacks UTown</a>'
             '\n'
-            'Al Amaan Restaurant: \n https://alamaanrestaurant.com/order/ \n'
+            '<a href="https://alamaanrestaurant.com/order/">Al Amaan Restaurant</a>'
             '\n'
-            'McDonalds: \n https://www.mcdelivery.com.sg/sg/ \n'
+            '<a href="https://www.mcdelivery.com.sg/sg/">McDonalds</a>'
+            '\n'
             '\n'
             'Your Delivery Address is: \n - 18 College Ave East,  Singapore 138593 (Cinnamon) \n - 16 College Ave West, Singapore 138527 (West) \n',
             keyboard = END
         )
     ], 
-    'Decide for me im lazy!': [
+    'Decide for me!': [
         Reply(
-            f'🤖: I have decided that your supper will be from ' + Supper.RANDOM_CHOICE + '!' + '\n' + Supper.MENU + '\n'
+            f'🤖: I have decided that your supper will be from <a href="{Supper.MENU}">{Supper.RANDOM_CHOICE}</a>' + '!'
+            '\n'
+            '\n'
             'Your Delivery Address is: \n - 18 College Ave East,  Singapore 138593 (Cinnamon) \n - 16 College Ave West, Singapore 138527 (West) \n',
             keyboard = END
         )
@@ -184,9 +187,9 @@ Supper.DATA[SHOP] = {
 }
 
 Supper.DATA[END] = {
-    'The End!': [
+    'I am Done!': [
         Reply(
-            '🤖: Enjoy your supper! (Use /supper to revisit)',
-        ), 
-    ],
+            '🤖: Enjoy your supper! (Use /supper to revisit)'
+        )
+    ]
 }
