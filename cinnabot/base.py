@@ -1,6 +1,4 @@
-import logging
-
-from telegram import Update, ParseMode, ReplyKeyboardRemove, replymarkup
+from telegram import Update, ParseMode, ReplyKeyboardRemove
 from telegram.ext import CallbackContext
 
 from cinnabot import Command
