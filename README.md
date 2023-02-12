@@ -16,3 +16,49 @@ Cinnabot-python is the codebase for @cinnabot, a Telegram bot that assists NUSC 
 
 **utils.py**: Contains Abstract Base Classes (ABCs) (code structures) that developers should follow and utilise for any coding through cinnabot-python.
 
+
+## Linux server deployment
+Temporary solution for deploying on `stu.comp.nus.edu.sg`
+Note that **tmux sessions do not sync between stu1 and stu2**
+_May need to log in and out to get back on the correct host_
+```
+# optional, depending on setup
+# We used conda to install python and packages
+conda activate cinnabot
+# tmux is used for persistence
+tmux
+# In a new tmux window
+ngrok http 5000
+# In another tmux window / pane
+python prepenv.py
+source environments.var
+python main.py
+```
+
+## Conda installation
+```
+ssh user@stu.comp.nus.edu.sg
+
+# https://github.com/conda-forge/miniforge/releases
+wget https://github.com/conda-forge/miniforge/releases/download/22.9.0-3/Mambaforge-22.9.0-3-Linux-x86_64.sh
+
+chmod u+x Mambaforge-22.9.0.3-Linux-x86-64.sh
+
+./Mambaforge-22.9.0.3-Linux-x86_64.sh
+
+
+git clone https://github.com/usdevs/cinnabot-python.git
+# Create the conda environment
+conda env create -f cinnabot_environment.yml -n cinnabot
+
+# Downloading ngrok
+wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
+tar -xvf ngrok-v3-stable-linux-amd64.tgz
+
+# Suggestion: add ngrok executable file to your PATH so you can just call ngrok
+
+# Add ngrok auth token
+ngrok config add-authtoken []
+
+```
+
